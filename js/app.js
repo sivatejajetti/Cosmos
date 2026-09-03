@@ -90,6 +90,9 @@ class Application {
         } else {
           this.planetFactory.artificialSatelliteFactory.setLayerVisible(layerName, visible);
         }
+      },
+      (visualSimEnabled) => {
+        this.planetFactory.setVisualSimulationMode(visualSimEnabled);
       }
     );
 
@@ -111,8 +114,7 @@ class Application {
     });
 
     this.loadingScreen = new LoadingScreen(() => {
-      // Reveal Hero Intro when loading completes
-      this.heroIntro.show();
+      // Enter Solar System directly without popups
     });
 
     // 7. Connect Callbacks & Hierarchical Navigation

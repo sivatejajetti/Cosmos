@@ -271,3 +271,25 @@ export function getLiveOrbitAngle(config, date = new Date()) {
   const meanAnomaly = m0 + (2 * Math.PI / period) * elapsedDays;
   return meanAnomaly % (Math.PI * 2);
 }
+
+/**
+ * Calculates real-time axial rotation angle for Earth & planets based on live UTC system clock
+ */
+export function getLiveRotationAngle(config, date = new Date()) {
+  let rotationHours = 24.0;
+  if (config.id === 'earth') rotationHours = 24.0;
+  else if (config.id === 'mars') rotationHours = 24.62;
+  else if (config.id === 'jupiter') rotationHours = 9.93;
+  else if (config.id === 'saturn') rotationHours = 10.7;
+  else if (config.id === 'mercury') rotationHours = 1407.6;
+  else if (config.id === 'venus') rotationHours = 5832.5;
+  else if (config.id === 'uranus') rotationHours = 17.2;
+  else if (config.id === 'neptune') rotationHours = 16.1;
+
+  const secondsInDay = (date.getUTCHours() * 3600) + (date.getUTCMinutes() * 60) + date.getUTCSeconds() + (date.getUTCMilliseconds() / 1000);
+  const dayFraction = (secondsInDay / (rotationHours * 3600)) % 1;
+  const isRetrograde = (config.rotationSpeed && config.rotationSpeed < 0) || config.id === 'venus' || config.id === 'uranus';
+  
+  const angle = dayFraction * Math.PI * 2;
+  return isRetrograde ? -angle : angle;
+}

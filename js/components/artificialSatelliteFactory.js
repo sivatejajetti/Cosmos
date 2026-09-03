@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ARTIFICIAL_SATELLITES_DATA } from '../config/artificialSatellitesData.js';
+import { getLiveOrbitAngle } from '../config/planetsData.js';
 
 /**
  * Factory & Controller for 3D Artificial Satellites & Spacecraft (Segment 4)
@@ -19,6 +20,11 @@ export class ArtificialSatelliteFactory {
     };
     this.orbitsVisible = true;
     this.labelsVisible = true;
+    this.visualSimulationMode = true;
+  }
+
+  setVisualSimulationMode(enabled) {
+    this.visualSimulationMode = enabled;
   }
 
   createSpacecraftForParent(parentConfig, parentContainer) {
@@ -38,14 +44,14 @@ export class ArtificialSatelliteFactory {
     const group = new THREE.Group();
     group.name = 'satellite-dot-group';
 
-    // 1. Core bright white dot (Radius 0.14)
-    const dotGeo = new THREE.SphereGeometry(0.14, 16, 16);
+    // 1. Core bright white dot (Compact radius 0.07)
+    const dotGeo = new THREE.SphereGeometry(0.07, 12, 12);
     const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const dotMesh = new THREE.Mesh(dotGeo, dotMat);
     group.add(dotMesh);
 
-    // 2. Outer glowing halo dot (Radius 0.32)
-    const haloGeo = new THREE.SphereGeometry(0.32, 16, 16);
+    // 2. Outer glowing halo dot (Compact radius 0.16)
+    const haloGeo = new THREE.SphereGeometry(0.16, 12, 12);
     const haloMat = new THREE.MeshBasicMaterial({
       color: colorHex,
       transparent: true,
@@ -55,8 +61,8 @@ export class ArtificialSatelliteFactory {
     const haloMesh = new THREE.Mesh(haloGeo, haloMat);
     group.add(haloMesh);
 
-    // 3. Equatorial target ring dot
-    const ringGeo = new THREE.RingGeometry(0.35, 0.45, 16);
+    // 3. Equatorial target ring dot (Compact radius 0.18–0.23)
+    const ringGeo = new THREE.RingGeometry(0.18, 0.23, 16);
     const ringMat = new THREE.MeshBasicMaterial({
       color: colorHex,
       side: THREE.DoubleSide,
@@ -220,16 +226,27 @@ export class ArtificialSatelliteFactory {
 
   update(delta, timeSpeed = 1.0) {
     const timeFactor = delta * 60 * timeSpeed;
+    const now = new Date();
 
     this.spacecraftList.forEach(s => {
       const isLayerVisible = this.layerVisibility[s.config.layer] !== false;
       if (!isLayerVisible) return;
 
-      s.orbitAngle += s.config.orbitSpeed * 0.012 * timeFactor;
+      if (this.visualSimulationMode) {
+        // Visual Motion Simulation Mode: active fluid orbital motion for satellite dots
+        s.orbitAngle += (s.config.orbitSpeed || 1.0) * 0.018 * timeFactor;
+      } else if (timeSpeed === 1.0) {
+        // 1:1 Astronomical Real-Time Clock Mode
+        s.orbitAngle = getLiveOrbitAngle(s.config, now);
+      } else {
+        // Accelerated simulation time mode
+        s.orbitAngle += (s.config.orbitSpeed || 1.0) * 0.012 * timeFactor;
+      }
+
       s.satContainer.position.x = Math.cos(s.orbitAngle) * s.config.orbitalDistance;
       s.satContainer.position.z = Math.sin(s.orbitAngle) * s.config.orbitalDistance;
 
-      s.modelMesh.rotation.y += s.config.rotationSpeed * timeFactor;
+      s.modelMesh.rotation.y += (s.config.rotationSpeed || 0.01) * timeFactor;
     });
   }
 }

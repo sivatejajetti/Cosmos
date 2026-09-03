@@ -2,20 +2,31 @@
  * Simulation Control Bar Component (Time Speed, Display Toggles & Layer Controls)
  */
 export class SimControls {
-  constructor(onTimeSpeedChange, onToggleOrbits, onToggleLabels, onToggleLayer) {
+  constructor(onTimeSpeedChange, onToggleOrbits, onToggleLabels, onToggleLayer, onToggleVisualSim) {
     this.onTimeSpeedChange = onTimeSpeedChange;
     this.onToggleOrbits = onToggleOrbits;
     this.onToggleLabels = onToggleLabels;
     this.onToggleLayer = onToggleLayer;
+    this.onToggleVisualSim = onToggleVisualSim;
 
     this.speed = 1.0;
     this.orbitsVisible = true;
     this.labelsVisible = true;
+    this.visualSimEnabled = true;
 
     this.init();
   }
 
   init() {
+    // Motion Simulation Toggle Switch
+    const toggleVisualSim = document.getElementById('toggle-visual-simulation');
+    if (toggleVisualSim) {
+      toggleVisualSim.addEventListener('change', (e) => {
+        this.visualSimEnabled = e.target.checked;
+        if (this.onToggleVisualSim) this.onToggleVisualSim(this.visualSimEnabled);
+      });
+    }
+
     // Time Speed buttons
     const speedButtons = document.querySelectorAll('.speed-btn');
     speedButtons.forEach(btn => {

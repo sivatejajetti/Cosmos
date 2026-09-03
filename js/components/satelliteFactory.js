@@ -15,6 +15,11 @@ export class SatelliteFactory {
     this.activeParentId = null; // null = overview mode (hide satellite orbits & labels)
     this.orbitsVisible = true;
     this.labelsVisible = true;
+    this.visualSimulationMode = true;
+  }
+
+  setVisualSimulationMode(enabled) {
+    this.visualSimulationMode = enabled;
   }
 
   createSatellitesForPlanet(planetConfig, planetContainer) {
@@ -174,13 +179,24 @@ export class SatelliteFactory {
 
   update(delta, timeSpeed = 1.0) {
     const timeFactor = delta * 60 * timeSpeed;
+    const now = new Date();
 
     this.satellites.forEach(s => {
-      s.orbitAngle += s.config.orbitSpeed * 0.01 * timeFactor;
+      if (this.visualSimulationMode) {
+        // Visual Motion Simulation Mode: active fluid orbital motion for natural moons
+        s.orbitAngle += (s.config.orbitSpeed || 1.0) * 0.014 * timeFactor;
+      } else if (timeSpeed === 1.0) {
+        // 1:1 Astronomical Real-Time Clock Mode
+        s.orbitAngle = getLiveOrbitAngle(s.config, now);
+      } else {
+        // Accelerated simulation time mode
+        s.orbitAngle += (s.config.orbitSpeed || 1.0) * 0.01 * timeFactor;
+      }
+
       s.satelliteContainer.position.x = Math.cos(s.orbitAngle) * s.config.orbitalDistance;
       s.satelliteContainer.position.z = Math.sin(s.orbitAngle) * s.config.orbitalDistance;
 
-      s.moonMesh.rotation.y += s.config.rotationSpeed * timeFactor;
+      s.moonMesh.rotation.y += (s.config.rotationSpeed || 0.005) * timeFactor;
     });
   }
 }

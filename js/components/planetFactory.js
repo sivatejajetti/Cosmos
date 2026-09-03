@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PLANETS_DATA, getLiveOrbitAngle } from '../config/planetsData.js';
+import { PLANETS_DATA, getLiveOrbitAngle, getLiveRotationAngle } from '../config/planetsData.js';
 import { TextureGenerator } from './textureGen.js';
 import { TextureManager } from '../services/textureManager.js';
 import { Shaders } from './shaders.js';
@@ -16,11 +16,18 @@ export class PlanetFactory {
     this.planets = [];
     this.labelsVisible = true;
     this.orbitsVisible = true;
+    this.visualSimulationMode = true;
 
     this.satelliteFactory = new SatelliteFactory(scene);
     this.artificialSatelliteFactory = new ArtificialSatelliteFactory(scene);
 
     this.init();
+  }
+
+  setVisualSimulationMode(enabled) {
+    this.visualSimulationMode = enabled;
+    this.satelliteFactory.setVisualSimulationMode(enabled);
+    this.artificialSatelliteFactory.setVisualSimulationMode(enabled);
   }
 
   init() {
@@ -246,19 +253,22 @@ export class PlanetFactory {
     const now = new Date();
 
     this.planets.forEach(p => {
-      if (timeSpeed === 1.0) {
-        // Live astronomical time sync
+      if (this.visualSimulationMode) {
+        // Visual Motion Simulation Mode: active fluid orbital motion & spin
+        p.orbitAngle += (p.config.orbitSpeed || 1.0) * 0.0025 * timeFactor;
+        p.planetMesh.rotation.y += (p.config.rotationSpeed || 0.01) * 1.5 * timeFactor;
+      } else if (timeSpeed === 1.0) {
+        // 1:1 Astronomical Real-Time Clock Mode
         p.orbitAngle = getLiveOrbitAngle(p.config, now);
+        p.planetMesh.rotation.y = getLiveRotationAngle(p.config, now);
       } else {
         // Accelerated simulation time mode
         p.orbitAngle += p.config.orbitSpeed * 0.002 * timeFactor;
+        p.planetMesh.rotation.y += p.config.rotationSpeed * timeFactor;
       }
 
       p.planetContainer.position.x = Math.cos(p.orbitAngle) * p.config.distance;
       p.planetContainer.position.z = Math.sin(p.orbitAngle) * p.config.distance;
-
-      // Axial self rotation
-      p.planetMesh.rotation.y += p.config.rotationSpeed * timeFactor;
     });
 
     // Update natural satellites & artificial spacecraft

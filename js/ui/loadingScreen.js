@@ -29,9 +29,9 @@ export class LoadingScreen {
         currentStage++;
       } else {
         clearInterval(interval);
-        setTimeout(() => this.finish(), 400);
+        setTimeout(() => this.finish(), 80);
       }
-    }, 300);
+    }, 40);
   }
 
   finish() {
@@ -40,7 +40,7 @@ export class LoadingScreen {
       setTimeout(() => {
         this.container.style.display = 'none';
         if (this.onComplete) this.onComplete();
-      }, 600);
+      }, 200);
     } else {
       if (this.onComplete) this.onComplete();
     }

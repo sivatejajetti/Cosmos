@@ -130,6 +130,7 @@ html, body {
 
 /* 2. Hero Introduction Overlay */
 .hero-intro {
+  display: none !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -137,7 +138,6 @@ html, body {
   height: 100vh;
   background: radial-gradient(circle at center, rgba(3, 7, 18, 0.4) 0%, rgba(2, 5, 14, 0.85) 100%);
   z-index: 500;
-  display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
@@ -630,10 +630,21 @@ kbd {
   transform: translateX(12px);
 }
 
+.switch-label input:checked + .highlight-slider {
+  background: linear-gradient(135deg, #06b6d4 0%, #38bdf8 100%);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+}
+
 .switch-text {
   font-size: 0.75rem;
   color: #e2e8f0;
   font-weight: 500;
+}
+
+.switch-label input:checked ~ .highlight-text {
+  color: #38bdf8;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
 }
 
 /* 6. Redesigned Modular Tabbed Information Panel (Segment 6 Wikipedia Integration) */
