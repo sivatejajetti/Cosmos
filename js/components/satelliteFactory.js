@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SATELLITES_DATA } from '../config/satellitesData.js';
 import { TextureGenerator } from './textureGen.js';
+import { TextureManager } from '../services/textureManager.js';
 import { getLiveOrbitAngle } from '../config/planetsData.js';
 
 /**
@@ -82,7 +83,7 @@ export class SatelliteFactory {
     satelliteContainer.position.set(config.orbitalDistance, 0, 0);
 
     const geometry = new THREE.SphereGeometry(config.radius, 32, 32);
-    const texture = TextureGenerator.getTexture(config.textureType || 'moon');
+    const texture = TextureManager.getTexture(config.textureType || 'moon');
 
     const material = new THREE.MeshStandardMaterial({
       map: texture,
