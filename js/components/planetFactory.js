@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PLANETS_DATA, getLiveOrbitAngle } from '../config/planetsData.js';
 import { TextureGenerator } from './textureGen.js';
+import { TextureManager } from '../services/textureManager.js';
 import { Shaders } from './shaders.js';
 import { SatelliteFactory } from './satelliteFactory.js';
 import { ArtificialSatelliteFactory } from './artificialSatelliteFactory.js';
@@ -81,13 +82,27 @@ export class PlanetFactory {
     const initialOrbitAngle = getLiveOrbitAngle(config, new Date());
 
     const geometry = new THREE.SphereGeometry(config.radius, 64, 64);
-    const texture = TextureGenerator.getTexture(config.textureType);
 
-    const material = new THREE.MeshStandardMaterial({
-      map: texture,
-      roughness: 0.7,
-      metalness: 0.1
-    });
+    // Get texture through TextureManager for caching + sRGB colorSpace handling
+    const texture = TextureManager.getTexture(config.textureType);
+
+    // Per-planet material tuning — each planet gets its own independent instance
+    const materialProps = { map: texture, roughness: 0.75, metalness: 0.05 };
+    if (config.id === 'earth') {
+      // Earth: slightly specular ocean reflections, lower roughness
+      materialProps.roughness = 0.62;
+      materialProps.metalness = 0.08;
+    } else if (config.id === 'jupiter' || config.id === 'saturn') {
+      // Gas giants: smooth cloud tops
+      materialProps.roughness = 0.55;
+      materialProps.metalness = 0.02;
+    } else if (config.id === 'mercury') {
+      // Mercury: highly cratered, rough rock
+      materialProps.roughness = 0.90;
+      materialProps.metalness = 0.0;
+    }
+
+    const material = new THREE.MeshStandardMaterial(materialProps);
 
     const planetMesh = new THREE.Mesh(geometry, material);
     planetMesh.name = config.id;
@@ -109,42 +124,48 @@ export class PlanetFactory {
     planetContainer.add(planetMesh);
 
     // Atmospheric Fresnel Shader Layer
+    // coefficient=0.70 means glow only appears at the very limb edge, not over the disc centre
     if (config.hasAtmosphere) {
-      const atmosGeo = new THREE.SphereGeometry(config.radius * 1.04, 64, 64);
+      const atmosGeo = new THREE.SphereGeometry(config.radius * 1.035, 64, 64);
       const atmosMat = Shaders.createAtmosphereMaterial(
         config.atmosphereColor || config.color,
-        4.0,
-        0.75
+        4.5,   // power — higher = tighter edge glow
+        0.70   // coefficient — lower = glow starts closer to silhouette
       );
       const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+      atmosMesh.name = `${config.id}-atmosphere`;
       planetContainer.add(atmosMesh);
     }
 
-    // Saturn Rings
+    // Saturn Rings — independent material, ring UV remapped radially (0=inner, 1=outer)
     if (config.hasRings && config.ringConfig) {
-      const ringGeo = new THREE.RingGeometry(config.ringConfig.innerRadius, config.ringConfig.outerRadius, 64);
-      const ringTex = TextureGenerator.getTexture(config.ringConfig.textureType);
+      const { innerRadius, outerRadius, textureType: ringType } = config.ringConfig;
+      const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 128);
+      const ringTex = TextureManager.getTexture(ringType);
 
+      // Fix UV: Three.js RingGeometry uses angular UV by default;
+      // remap v to be the radial fraction 0→1 from inner to outer edge
       const pos = ringGeo.attributes.position;
-      const uv = ringGeo.attributes.uv;
+      const uv  = ringGeo.attributes.uv;
       for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i);
-        const y = pos.getY(i);
-        const u = (Math.atan2(y, x) + Math.PI) / (Math.PI * 2);
-        const v = (Math.sqrt(x * x + y * y) - config.ringConfig.innerRadius) / (config.ringConfig.outerRadius - config.ringConfig.innerRadius);
-        uv.setXY(i, u, v);
+        const px = pos.getX(i), py = pos.getY(i);
+        const radial = (Math.sqrt(px * px + py * py) - innerRadius) / (outerRadius - innerRadius);
+        uv.setXY(i, radial, 0.5); // u=radial fraction, v=constant row
       }
+      uv.needsUpdate = true;
 
-      const ringMat = new THREE.MeshStandardMaterial({
+      const ringMat = new THREE.MeshBasicMaterial({
         map: ringTex,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.9,
-        roughness: 0.5
+        opacity: 0.92,
+        depthWrite: false,   // prevent ring from occluding planet surface
+        alphaTest: 0.01
       });
 
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.name = `${config.id}-rings`;
       planetContainer.add(ringMesh);
     }
 

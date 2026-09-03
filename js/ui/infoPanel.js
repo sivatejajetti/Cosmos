@@ -191,7 +191,9 @@ export class InfoPanel {
     const modeBtns = this.container.querySelectorAll('.ai-mode-btn');
     modeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        this.aiMode = btn.getAttribute('data-ai-mode');
+        const newMode = btn.getAttribute('data-ai-mode');
+        this.aiMode = newMode;
+        this.aiQuestion = null; // Reset custom question so mode chips generate fresh mode explanations
         this.aiExplanation = null;
         this.aiError = null;
         this._aiRequested = false;

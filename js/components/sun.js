@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { SUN_CONFIG } from '../config/planetsData.js';
+import { TextureManager } from '../services/textureManager.js';
 import { TextureGenerator } from './textureGen.js';
 import { Shaders } from './shaders.js';
 
@@ -21,7 +22,7 @@ export class Sun {
     this.group = new THREE.Group();
     this.group.name = 'sun-group';
 
-    // 1. Sun Texture & Custom GLSL Surface Material
+    // 1. Sun Texture — loaded via TextureGenerator (sRGB configured inside)
     const sunTexture = TextureGenerator.getTexture('sun');
     this.sunMaterial = Shaders.createSunMaterial(sunTexture);
 

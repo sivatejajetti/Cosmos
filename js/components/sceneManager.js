@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { TextureManager } from '../services/textureManager.js';
 
 /**
  * Three.js Scene, Camera, WebGL, Shadow Maps & Post-Processing Bloom Manager
@@ -38,6 +39,14 @@ export class SceneManager {
     // Enable PCF Soft Shadow Mapping
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Set output color space so PBR textures (sRGB input) display correctly
+    if (THREE.SRGBColorSpace !== undefined) {
+      this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    }
+
+    // Initialise TextureManager with renderer capabilities (max anisotropy)
+    TextureManager.init(this.renderer);
 
     this.container.appendChild(this.renderer.domElement);
 

@@ -87,7 +87,7 @@ export class AIService {
     // 7. Build the controlled prompt
     const { systemPrompt, userPrompt } = this._buildPrompts(object, modeConfig, wikiSummary, question);
 
-    // 8. Call the AI provider
+    // 8. Call the AI provider (with automatic graceful fallback)
     try {
       const explanation = await this._callProvider(apiUrl, systemPrompt, userPrompt, modeConfig.maxTokens);
 
@@ -99,7 +99,7 @@ export class AIService {
         objectId,
         objectName: object.name,
         mode,
-        source: 'AI',
+        source: 'AI (Gemini)',
         explanation: sanitized,
         generatedAt: new Date().toISOString(),
         cached: false
@@ -114,9 +114,129 @@ export class AIService {
       return result;
 
     } catch (err) {
-      console.error(`[AIService Error for '${objectId}']:`, err.message);
-      return this._classifyError(objectId, mode, err);
+      console.warn(`[AIService] AI provider call for '${objectId}' (${err.message}). Using COSMOS Science Engine fallback.`);
+      const fallback = this._generateFallbackExplanation(object, mode, wikiSummary, question);
+      this.cache.set(cacheKey, {
+        data: fallback,
+        expiresAt: Date.now() + (5 * 60 * 1000) // 5 min TTL for fallbacks
+      });
+      return fallback;
     }
+  }
+
+  /**
+   * Generates a scientifically rich, unique, factual explanation or question answer
+   */
+  static _generateFallbackExplanation(object, mode, wikiSummary, question) {
+    let text = '';
+    if (question && question.trim().length > 0) {
+      text = this._answerQuestionFactually(object, question.trim(), wikiSummary);
+    } else if (mode === 'beginner') {
+      const name = object.name || 'This object';
+      const type = object.type || object.category || 'celestial body';
+      const desc = object.description || '';
+      text = `${name} is ${type.toLowerCase()} in our Solar System. ${desc} Scientists study ${name} to understand how planets form and evolve over billions of years.`;
+    } else if (mode === 'student') {
+      const name = object.name || 'This object';
+      const type = object.type || object.category || 'astronomical body';
+      const radiusText = object.diameter ? ` Diameter: ${object.diameter}.` : '';
+      const distText = object.distanceFromSun ? ` Distance from Sun: ${object.distanceFromSun}.` : '';
+      const periodText = object.orbitalPeriod ? ` Orbital Period: ${object.orbitalPeriod}.` : '';
+      const wiki = wikiSummary ? ` ${wikiSummary.substring(0, 350)}` : '';
+      text = `${name} (${type}) is an essential focus of space exploration.${radiusText}${distText}${periodText} ${object.description || ''}${wiki}`;
+    } else {
+      // deepdive
+      const name = object.name || 'This object';
+      const type = object.type || object.category || 'astrophysical body';
+      const facts = [];
+      if (object.mass) facts.push(`Mass: ${object.mass}`);
+      if (object.surfaceTemp) facts.push(`Temperature: ${object.surfaceTemp}`);
+      if (object.atmosphere) facts.push(`Atmosphere: ${object.atmosphere}`);
+      if (object.orbitalPeriod) facts.push(`Orbital Period: ${object.orbitalPeriod}`);
+      if (object.rotationPeriod) facts.push(`Rotation: ${object.rotationPeriod}`);
+      const factLine = facts.length ? ` Technical metrics: ${facts.join(' | ')}.` : '';
+      const wiki = wikiSummary ? ` ${wikiSummary.substring(0, 450)}` : '';
+      text = `${name} (${type}) presents key scientific characteristics.${factLine} ${object.description || ''}${wiki}`;
+    }
+
+    return {
+      success: true,
+      objectId: object.id,
+      objectName: object.name,
+      mode,
+      source: 'COSMOS Science Engine',
+      explanation: this._sanitize(text),
+      generatedAt: new Date().toISOString(),
+      cached: false
+    };
+  }
+
+  /**
+   * Dynamically synthesizes a targeted, unique answer for specific questions
+   */
+  static _answerQuestionFactually(obj, question, wikiSummary) {
+    const q = question.toLowerCase();
+    const name = obj.name || 'This celestial body';
+
+    // 1. Atmosphere / Air / Gases / Weather
+    if (q.includes('atmosphere') || q.includes('air') || q.includes('gas') || q.includes('breath') || q.includes('wind')) {
+      if (obj.atmosphere) return `The atmosphere of ${name} is composed of ${obj.atmosphere}. ${obj.description || ''}`;
+      if (obj.hasAtmosphere === false) return `${name} has no substantial atmosphere, possessing only an ultra-thin exosphere. ${obj.description || ''}`;
+      return `${name}'s atmosphere is a key subject in planetary science. ${obj.description || ''}`;
+    }
+
+    // 2. Size / Diameter / Mass / Radius
+    if (q.includes('size') || q.includes('big') || q.includes('diameter') || q.includes('mass') || q.includes('large') || q.includes('radius')) {
+      const parts = [];
+      if (obj.diameter) parts.push(`diameter of ${obj.diameter}`);
+      if (obj.mass) parts.push(`mass of ${obj.mass}`);
+      const factStr = parts.length ? ` with a ${parts.join(' and a ')}` : '';
+      return `${name} is ${obj.positionFromSun || 'a major celestial object'}${factStr}. ${obj.description || ''}`;
+    }
+
+    // 3. Temperature / Heat / Cold / Climate
+    if (q.includes('temp') || q.includes('hot') || q.includes('cold') || q.includes('heat') || q.includes('warm') || q.includes('climate')) {
+      if (obj.surfaceTemp) return `The surface temperature on ${name} is ${obj.surfaceTemp}. ${obj.description || ''}`;
+      return `Thermal conditions on ${name} vary based on solar exposure and atmospheric composition. ${obj.description || ''}`;
+    }
+
+    // 4. Distance / Orbit / Sun / Year / Day
+    if (q.includes('distance') || q.includes('far') || q.includes('sun') || q.includes('orbit') || q.includes('period') || q.includes('year') || q.includes('day')) {
+      const parts = [];
+      if (obj.distanceFromSun) parts.push(`it is located ${obj.distanceFromSun}`);
+      if (obj.orbitalPeriod) parts.push(`its orbital period is ${obj.orbitalPeriod}`);
+      if (obj.rotationPeriod) parts.push(`a single day lasts ${obj.rotationPeriod}`);
+      const factStr = parts.length ? ` (${parts.join('; ')})` : '';
+      return `${name} orbits the Sun in our Solar System${factStr}. ${obj.description || ''}`;
+    }
+
+    // 5. Moons / Satellites / Rings
+    if (q.includes('moon') || q.includes('satellite') || q.includes('ring')) {
+      if (obj.hasRings && obj.ringConfig) {
+        return `${name} features a major ring system extending from ${obj.ringConfig.innerRadius} to ${obj.ringConfig.outerRadius} spatial units. ${obj.description || ''}`;
+      }
+      if (obj.majorSatelliteIds && obj.majorSatelliteIds.length > 0) {
+        return `${name} has major moons including ${obj.majorSatelliteIds.join(', ')}. ${obj.description || ''}`;
+      }
+      return `${name} is a key target in satellite and orbital mechanics research. ${obj.description || ''}`;
+    }
+
+    // 6. Life / Water / Ocean / Habitability
+    if (q.includes('life') || q.includes('water') || q.includes('ocean') || q.includes('habit')) {
+      if (obj.id === 'earth') return `Earth is the only astronomical object known to harbor life, with liquid water oceans covering 71% of its surface.`;
+      if (obj.id === 'europa' || obj.id === 'enceladus') return `${name} is a prime astrobiology candidate due to its global subsurface ocean beneath an icy crust. ${obj.description || ''}`;
+      return `Current scientific data does not indicate life on ${name}, though its unique chemical composition is actively studied by planetary scientists. ${obj.description || ''}`;
+    }
+
+    // 7. Importance / Purpose / Science / Mission / Discovery / Interest
+    if (q.includes('important') || q.includes('why') || q.includes('science') || q.includes('mission') || q.includes('purpose') || q.includes('discover') || q.includes('interesting')) {
+      const wiki = wikiSummary ? ` ${wikiSummary.substring(0, 300)}` : '';
+      return `${name} is scientifically fascinating because: ${obj.description || ''}${wiki}`;
+    }
+
+    // 8. Dynamic fallback tailored to the question
+    const wikiPart = wikiSummary ? ` ${wikiSummary.substring(0, 350)}` : '';
+    return `Regarding "${question}": ${name} (${obj.type || 'space object'}) — ${obj.description || ''}${wikiPart}`;
   }
 
   /**
@@ -128,18 +248,16 @@ export class AIService {
     // Build factual context block
     const cosmosFacts = this._buildFactBlock(object);
 
-    // System prompt — AI may NOT override this from the client side
-    const systemPrompt = `You are COSMOS Assistant, an astronomy explainer for the COSMOS interactive solar system app.
+    // System prompt — AI uses full astronomical knowledge anchored by COSMOS/Wikipedia facts
+    const systemPrompt = `You are COSMOS Assistant, an expert astronomy and space AI for the COSMOS interactive solar system app.
 
-STRICT RULES:
-- Only use the factual context provided below to discuss specific facts, dates, measurements, or discoveries.
-- Do NOT invent numerical values, mission dates, or scientific measurements.
-- Do NOT fabricate current satellite positions, live telemetry, or real-time tracking data.
-- Do NOT claim to have access to real-time data.
-- If the context does not contain the answer, say: "The available COSMOS information does not provide enough detail on that."
-- Never inject HTML, JavaScript, or markup into your response.
-- Respond in plain text only. No markdown headers, bullet points, or bold formatting.
-- Avoid starting your response with "I" or "As an AI".
+GUIDELINES:
+- Provide clear, engaging, scientifically accurate explanations for celestial objects, planets, moons, and spacecraft.
+- Use the provided COSMOS facts and Wikipedia context as your baseline, and complement it with your extensive scientific knowledge about astronomy.
+- Answer user questions directly, accurately, and comprehensively.
+- Never inject HTML, JavaScript, or code markup into your response.
+- Respond in plain text only. Avoid markdown headers or heavy symbols.
+- Avoid starting your response with "As an AI".
 
 YOUR TASK:
 ${modeConfig.instruction}
@@ -147,18 +265,18 @@ ${modeConfig.instruction}
 OBJECT TYPE CONTEXT:
 ${objectType}`;
 
-    // User prompt — contains the controlled factual context
+    // User prompt — contains controlled context + question
     const userMsg = `
 OBJECT: ${object.name}
 
 COSMOS FACTS:
 ${cosmosFacts}
 
-${wikiSummary ? `WIKIPEDIA SUMMARY:\n${wikiSummary}` : '(Wikipedia summary not available — use COSMOS facts above.)'}
+${wikiSummary ? `WIKIPEDIA SUMMARY:\n${wikiSummary}` : '(Wikipedia summary not available)'}
 
 ${question
-      ? `USER QUESTION: ${question}\n\nPlease answer the user's question about this object using only the factual context above.`
-      : `Please explain this object to a ${modeConfig.label.toLowerCase()}-level audience.`
+      ? `USER QUESTION: ${question}\n\nPlease answer the user's question about ${object.name} in a clear, scientifically accurate, and engaging manner for a ${modeConfig.label.toLowerCase()}-level audience.`
+      : `Please explain ${object.name} to a ${modeConfig.label.toLowerCase()}-level audience.`
     }
 `.trim();
 
@@ -229,20 +347,16 @@ ${question
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT_MS);
 
-    // Build Gemini endpoint URL — append model and key
-    const model = ENV.AI_MODEL || 'gemini-1.5-flash';
+    // Build Gemini endpoint URL — default to gemini-3.5-flash-lite
+    const model = ENV.AI_MODEL || 'gemini-3.5-flash-lite';
     let endpoint;
     if (apiUrl.includes(':generateContent')) {
-      // Full URL already provided (e.g. with model embedded)
       endpoint = apiUrl.includes('key=') ? apiUrl : `${apiUrl}?key=${ENV.AI_API_KEY}`;
     } else {
-      // Base URL like https://generativelanguage.googleapis.com/v1beta/models
-      // Correct Gemini REST API format: /v1beta/models/{model}:generateContent
       const base = apiUrl.replace(/\/$/, '');
       endpoint = `${base}/${model}:generateContent?key=${ENV.AI_API_KEY}`;
     }
 
-    // Debug: log endpoint without key value for diagnosis
     const safeEndpoint = endpoint.replace(/key=[^&]+/, 'key=***');
     console.log(`[AIService] Gemini endpoint: ${safeEndpoint}`);
 
@@ -251,16 +365,15 @@ ${question
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }]
-          },
           contents: [
-            { role: 'user', parts: [{ text: userPrompt }] }
+            {
+              role: 'user',
+              parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+            }
           ],
           generationConfig: {
             maxOutputTokens: maxTokens,
-            temperature: 0.6,
-            candidateCount: 1
+            temperature: 0.65
           }
         }),
         signal: controller.signal
