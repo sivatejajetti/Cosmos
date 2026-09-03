@@ -36,107 +36,36 @@ export class ArtificialSatelliteFactory {
 
   createSpacecraftModel(template, colorHex = 0x38bdf8) {
     const group = new THREE.Group();
+    group.name = 'satellite-dot-group';
 
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0xd1d5db,
-      metalness: 0.8,
-      roughness: 0.2
-    });
+    // 1. Core bright white dot (Radius 0.14)
+    const dotGeo = new THREE.SphereGeometry(0.14, 16, 16);
+    const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const dotMesh = new THREE.Mesh(dotGeo, dotMat);
+    group.add(dotMesh);
 
-    const goldMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b,
-      metalness: 0.9,
-      roughness: 0.1
-    });
-
-    const solarMat = new THREE.MeshStandardMaterial({
-      color: 0x1e3a8a,
-      roughness: 0.3,
-      metalness: 0.6
-    });
-
-    const accentMat = new THREE.MeshStandardMaterial({
+    // 2. Outer glowing halo dot (Radius 0.32)
+    const haloGeo = new THREE.SphereGeometry(0.32, 16, 16);
+    const haloMat = new THREE.MeshBasicMaterial({
       color: colorHex,
-      emissive: colorHex,
-      emissiveIntensity: 0.4
+      transparent: true,
+      opacity: 0.75,
+      depthWrite: false
     });
+    const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+    group.add(haloMesh);
 
-    if (template === 'pioneer') {
-      const sphereGeo = new THREE.SphereGeometry(0.35, 16, 16);
-      const sphereMesh = new THREE.Mesh(sphereGeo, goldMat);
-      group.add(sphereMesh);
-
-      for (let i = 0; i < 4; i++) {
-        const antennaGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.4, 8);
-        const antennaMesh = new THREE.Mesh(antennaGeo, bodyMat);
-        antennaMesh.rotation.z = Math.PI / 4 + (i * Math.PI / 2);
-        antennaMesh.rotation.y = (i * Math.PI / 2);
-        antennaMesh.position.set(0, 0, 0);
-        group.add(antennaMesh);
-      }
-    } else if (template === 'telescope') {
-      const barrelGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.0, 16);
-      const barrelMesh = new THREE.Mesh(barrelGeo, bodyMat);
-      barrelMesh.rotation.z = Math.PI / 2;
-      group.add(barrelMesh);
-
-      const ringGeo = new THREE.TorusGeometry(0.32, 0.04, 8, 16);
-      const ringMesh = new THREE.Mesh(ringGeo, accentMat);
-      ringMesh.position.x = 0.5;
-      ringMesh.rotation.y = Math.PI / 2;
-      group.add(ringMesh);
-
-      const wingGeo = new THREE.BoxGeometry(0.04, 1.2, 0.4);
-      const wing1 = new THREE.Mesh(wingGeo, solarMat);
-      wing1.position.set(0, 0, 0.5);
-      const wing2 = new THREE.Mesh(wingGeo, solarMat);
-      wing2.position.set(0, 0, -0.5);
-      group.add(wing1);
-      group.add(wing2);
-    } else if (template === 'radar') {
-      const boxGeo = new THREE.BoxGeometry(0.5, 0.4, 0.4);
-      const boxMesh = new THREE.Mesh(boxGeo, bodyMat);
-      group.add(boxMesh);
-
-      const sarGeo = new THREE.BoxGeometry(1.4, 0.04, 0.6);
-      const sarMesh = new THREE.Mesh(sarGeo, goldMat);
-      sarMesh.position.set(0, -0.3, 0);
-      group.add(sarMesh);
-
-      const wingGeo = new THREE.BoxGeometry(1.2, 0.3, 0.03);
-      const wing = new THREE.Mesh(wingGeo, solarMat);
-      wing.position.set(0, 0.35, 0);
-      group.add(wing);
-    } else if (template === 'probe') {
-      const busGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.45, 6);
-      const busMesh = new THREE.Mesh(busGeo, bodyMat);
-      group.add(busMesh);
-
-      const dishGeo = new THREE.ConeGeometry(0.3, 0.15, 16);
-      const dishMesh = new THREE.Mesh(dishGeo, goldMat);
-      dishMesh.position.set(0, 0.3, 0);
-      dishMesh.rotation.x = Math.PI;
-      group.add(dishMesh);
-
-      const wingGeo = new THREE.BoxGeometry(1.4, 0.03, 0.35);
-      const wing = new THREE.Mesh(wingGeo, solarMat);
-      wing.position.set(0, 0, 0);
-      group.add(wing);
-    } else {
-      const boxGeo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-      const boxMesh = new THREE.Mesh(boxGeo, bodyMat);
-      group.add(boxMesh);
-
-      const wingGeo = new THREE.BoxGeometry(1.6, 0.03, 0.35);
-      const wing = new THREE.Mesh(wingGeo, solarMat);
-      group.add(wing);
-
-      const dishGeo = new THREE.SphereGeometry(0.18, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2);
-      const dishMesh = new THREE.Mesh(dishGeo, accentMat);
-      dishMesh.position.set(0, 0.25, 0);
-      dishMesh.rotation.x = Math.PI / 2;
-      group.add(dishMesh);
-    }
+    // 3. Equatorial target ring dot
+    const ringGeo = new THREE.RingGeometry(0.35, 0.45, 16);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: colorHex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = Math.PI / 2;
+    group.add(ringMesh);
 
     return group;
   }

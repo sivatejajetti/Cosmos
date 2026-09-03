@@ -1,17 +1,20 @@
 /**
  * Centralized Natural Satellites (Moons) Dataset for COSMOS
- * Includes Keplerian Live Time Parameters
+ * Contains real physical radius (in km) and actual names for all major moons across planets.
  */
 
 export const SATELLITES_DATA = [
-  // --- EARTH MOONS ---
+  // ============================================================
+  // EARTH MOON
+  // ============================================================
   {
     id: 'moon',
     name: 'Moon',
     wikipediaTitle: 'Moon',
     parentPlanetId: 'earth',
     type: 'Natural Satellite',
-    radius: 0.6,
+    realRadiusKm: 1737.4,
+    radius: 0.60, // Proportional actual radius scale
     orbitalDistance: 5.5,
     orbitalPeriodDays: 27.321,
     M0: 0,
@@ -26,17 +29,20 @@ export const SATELLITES_DATA = [
     mass: '7.34 × 10²² kg (0.012 Earths)',
     surfaceTemp: '-130 °C to 120 °C',
     composition: 'Silicate rock, basaltic maria, lunar regolith',
-    description: 'Earth\'s only natural satellite. The fifth largest moon in the Solar System, tidally locked so that the same side always faces Earth.'
+    description: "Earth's only natural satellite. The fifth largest moon in the Solar System, tidally locked so that the same side always faces Earth."
   },
 
-  // --- MARS MOONS ---
+  // ============================================================
+  // MARS MOONS
+  // ============================================================
   {
     id: 'phobos',
     name: 'Phobos',
     wikipediaTitle: 'Phobos (moon)',
     parentPlanetId: 'mars',
     type: 'Natural Satellite',
-    radius: 0.3,
+    realRadiusKm: 11.2,
+    radius: 0.22, // Irregular tiny moon (clamped min for 3D visibility)
     orbitalDistance: 3.2,
     orbitalPeriodDays: 0.3189, // ~7.6 hours
     M0: 1.2,
@@ -59,14 +65,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Deimos (moon)',
     parentPlanetId: 'mars',
     type: 'Natural Satellite',
-    radius: 0.22,
+    realRadiusKm: 6.2,
+    radius: 0.20,
     orbitalDistance: 4.8,
     orbitalPeriodDays: 1.263, // ~30.3 hours
     M0: 3.1,
     orbitSpeed: 1.8,
     rotationSpeed: 0.008,
     color: 0x6b7280,
-    textureType: 'phobos',
+    textureType: 'deimos',
     diameter: '12.4 km',
     distanceFromPlanet: '23,460 km',
     orbitalPeriod: '30.3 hours',
@@ -77,14 +84,17 @@ export const SATELLITES_DATA = [
     description: 'The smaller and outer moon of Mars. It has a smooth surface coated in a deep layer of pulverised rock dust.'
   },
 
-  // --- JUPITER MOONS ---
+  // ============================================================
+  // JUPITER MOONS (Galilean & Inner)
+  // ============================================================
   {
     id: 'io',
     name: 'Io',
     wikipediaTitle: 'Io (moon)',
     parentPlanetId: 'jupiter',
     type: 'Galilean Satellite',
-    radius: 0.65,
+    realRadiusKm: 1821.6,
+    radius: 0.63,
     orbitalDistance: 11.5,
     orbitalPeriodDays: 1.769,
     M0: 0.5,
@@ -107,7 +117,8 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Europa (moon)',
     parentPlanetId: 'jupiter',
     type: 'Galilean Satellite',
-    radius: 0.58,
+    realRadiusKm: 1560.8,
+    radius: 0.54,
     orbitalDistance: 15.0,
     orbitalPeriodDays: 3.551,
     M0: 2.1,
@@ -122,7 +133,7 @@ export const SATELLITES_DATA = [
     mass: '4.80 × 10²² kg',
     surfaceTemp: '-160 °C to -220 °C',
     composition: 'Smooth water-ice crust covering a global liquid ocean',
-    description: 'Wrapped in a smooth crust of water ice crisscrossed by reddish fractures. A subsurface global ocean contains twice the water of Earth\'s oceans.'
+    description: "Wrapped in a smooth crust of water ice crisscrossed by reddish fractures. A subsurface global ocean contains twice the water of Earth's oceans."
   },
   {
     id: 'ganymede',
@@ -130,14 +141,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Ganymede (moon)',
     parentPlanetId: 'jupiter',
     type: 'Galilean Satellite',
-    radius: 0.85,
+    realRadiusKm: 2634.1,
+    radius: 0.91, // Largest moon in Solar System
     orbitalDistance: 19.5,
     orbitalPeriodDays: 7.155,
     M0: 4.8,
     orbitSpeed: 1.2,
     rotationSpeed: 0.004,
     color: 0xa1a1aa,
-    textureType: 'moon',
+    textureType: 'ganymede',
     diameter: '5,268 km (Larger than Mercury)',
     distanceFromPlanet: '1,070,400 km',
     orbitalPeriod: '7.15 days',
@@ -153,14 +165,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Callisto (moon)',
     parentPlanetId: 'jupiter',
     type: 'Galilean Satellite',
-    radius: 0.78,
+    realRadiusKm: 2410.3,
+    radius: 0.83,
     orbitalDistance: 24.0,
     orbitalPeriodDays: 16.689,
     M0: 1.1,
     orbitSpeed: 0.85,
     rotationSpeed: 0.003,
     color: 0x71717a,
-    textureType: 'phobos',
+    textureType: 'callisto',
     diameter: '4,821 km',
     distanceFromPlanet: '1,882,700 km',
     orbitalPeriod: '16.7 days',
@@ -170,15 +183,42 @@ export const SATELLITES_DATA = [
     composition: 'Equal mix of rock and water ice',
     description: 'The most heavily cratered world in the Solar System. Its ancient surface shows almost no geological activity, serving as a time capsule of the early Solar System.'
   },
+  {
+    id: 'amalthea',
+    name: 'Amalthea',
+    wikipediaTitle: 'Amalthea (moon)',
+    parentPlanetId: 'jupiter',
+    type: 'Inner Satellite',
+    realRadiusKm: 83.5,
+    radius: 0.25,
+    orbitalDistance: 8.5,
+    orbitalPeriodDays: 0.498,
+    M0: 0.9,
+    orbitSpeed: 2.6,
+    rotationSpeed: 0.01,
+    color: 0xef4444,
+    textureType: 'phobos',
+    diameter: '167 km',
+    distanceFromPlanet: '181,365 km',
+    orbitalPeriod: '12 hours',
+    rotationPeriod: '12 hours (tidally locked)',
+    mass: '2.08 × 10¹⁸ kg',
+    surfaceTemp: '-150 °C',
+    composition: 'Porous water ice and reddish sulfur deposits',
+    description: 'The third moon from Jupiter. Highly irregular and deeply red, radiating more heat than it receives from the Sun.'
+  },
 
-  // --- SATURN MOONS ---
+  // ============================================================
+  // SATURN MOONS
+  // ============================================================
   {
     id: 'titan',
     name: 'Titan',
     wikipediaTitle: 'Titan (moon)',
     parentPlanetId: 'saturn',
     type: 'Natural Satellite',
-    radius: 0.82,
+    realRadiusKm: 2574.7,
+    radius: 0.89,
     orbitalDistance: 18.0,
     orbitalPeriodDays: 15.945,
     M0: 2.2,
@@ -193,7 +233,7 @@ export const SATELLITES_DATA = [
     mass: '1.35 × 10²³ kg',
     surfaceTemp: '-179 °C',
     atmosphere: 'Dense Nitrogen (95%) and Methane (5%)',
-    description: 'Saturn\'s largest moon and the only moon with a dense atmosphere. It has liquid methane rivers, lakes, and seas on its icy surface.'
+    description: "Saturn's largest moon and the only moon with a dense atmosphere. It has liquid methane rivers, lakes, and seas on its icy surface."
   },
   {
     id: 'enceladus',
@@ -201,7 +241,8 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Enceladus',
     parentPlanetId: 'saturn',
     type: 'Natural Satellite',
-    radius: 0.42,
+    realRadiusKm: 252.1,
+    radius: 0.28,
     orbitalDistance: 14.5,
     orbitalPeriodDays: 1.370,
     M0: 5.4,
@@ -224,14 +265,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Rhea (moon)',
     parentPlanetId: 'saturn',
     type: 'Natural Satellite',
-    radius: 0.5,
+    realRadiusKm: 763.8,
+    radius: 0.42,
     orbitalDistance: 21.0,
     orbitalPeriodDays: 4.518,
     M0: 0.8,
     orbitSpeed: 0.9,
     rotationSpeed: 0.004,
     color: 0xd1d5db,
-    textureType: 'moon',
+    textureType: 'rhea',
     diameter: '1,527 km',
     distanceFromPlanet: '527,108 km',
     orbitalPeriod: '4.52 days',
@@ -239,7 +281,7 @@ export const SATELLITES_DATA = [
     mass: '2.31 × 10²¹ kg',
     surfaceTemp: '-174 °C to -220 °C',
     composition: '75% water ice and 25% rock core',
-    description: 'Saturn\'s second-largest moon. Heavily cratered icy body with tenuous oxygen and carbon dioxide atmosphere.'
+    description: "Saturn's second-largest moon. Heavily cratered icy body with tenuous oxygen and carbon dioxide atmosphere."
   },
   {
     id: 'iapetus',
@@ -247,14 +289,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Iapetus (moon)',
     parentPlanetId: 'saturn',
     type: 'Natural Satellite',
-    radius: 0.48,
+    realRadiusKm: 734.5,
+    radius: 0.41,
     orbitalDistance: 26.0,
     orbitalPeriodDays: 79.321,
     M0: 3.6,
     orbitSpeed: 0.6,
     rotationSpeed: 0.003,
     color: 0x4b5563,
-    textureType: 'phobos',
+    textureType: 'iapetus',
     diameter: '1,469 km',
     distanceFromPlanet: '3,560,820 km',
     orbitalPeriod: '79.3 days',
@@ -264,27 +307,102 @@ export const SATELLITES_DATA = [
     composition: 'Icy materials with dark organic residue coating leading hemisphere',
     description: 'Famous for its dramatic two-tone coloration: one hemisphere is pitch dark while the other is snow-white, plus a massive equatorial mountain ridge.'
   },
+  {
+    id: 'mimas',
+    name: 'Mimas',
+    wikipediaTitle: 'Mimas (moon)',
+    parentPlanetId: 'saturn',
+    type: 'Natural Satellite',
+    realRadiusKm: 198.2,
+    radius: 0.25,
+    orbitalDistance: 11.5,
+    orbitalPeriodDays: 0.942,
+    M0: 1.5,
+    orbitSpeed: 2.0,
+    rotationSpeed: 0.008,
+    color: 0x9ca3af,
+    textureType: 'phobos',
+    diameter: '396 km',
+    distanceFromPlanet: '185,539 km',
+    orbitalPeriod: '22.6 hours',
+    rotationPeriod: '22.6 hours',
+    mass: '3.75 × 10¹⁹ kg',
+    surfaceTemp: '-209 °C',
+    composition: 'Mostly water ice with a small rocky core',
+    description: 'Known for the giant Herschel impact crater giving it an uncanny resemblance to the Star Wars Death Star.'
+  },
+  {
+    id: 'tethys',
+    name: 'Tethys',
+    wikipediaTitle: 'Tethys (moon)',
+    parentPlanetId: 'saturn',
+    type: 'Natural Satellite',
+    realRadiusKm: 531.1,
+    radius: 0.36,
+    orbitalDistance: 16.0,
+    orbitalPeriodDays: 1.887,
+    M0: 4.2,
+    orbitSpeed: 1.4,
+    rotationSpeed: 0.005,
+    color: 0xe2e8f0,
+    textureType: 'moon',
+    diameter: '1,062 km',
+    distanceFromPlanet: '294,619 km',
+    orbitalPeriod: '1.89 days',
+    rotationPeriod: '1.89 days',
+    mass: '6.17 × 10²⁰ kg',
+    surfaceTemp: '-187 °C',
+    composition: 'Almost pure water ice',
+    description: 'Low-density icy moon dominated by Odysseus, a massive crater 400 km across, and Ithaca Chasma, a trench 2,000 km long.'
+  },
+  {
+    id: 'dione',
+    name: 'Dione',
+    wikipediaTitle: 'Dione (moon)',
+    parentPlanetId: 'saturn',
+    type: 'Natural Satellite',
+    realRadiusKm: 561.4,
+    radius: 0.37,
+    orbitalDistance: 18.5,
+    orbitalPeriodDays: 2.737,
+    M0: 2.7,
+    orbitSpeed: 1.2,
+    rotationSpeed: 0.004,
+    color: 0xc084fc,
+    textureType: 'moon',
+    diameter: '1,122 km',
+    distanceFromPlanet: '377,396 km',
+    orbitalPeriod: '2.74 days',
+    rotationPeriod: '2.74 days',
+    mass: '1.10 × 10²¹ kg',
+    surfaceTemp: '-186 °C',
+    composition: 'Heavy water ice shell around a dense rocky core',
+    description: 'Orbits in 3:2 orbital resonance with Enceladus. Features bright icy chasm ice cliffs spanning hundreds of kilometers.'
+  },
 
-  // --- URANUS MOONS ---
+  // ============================================================
+  // URANUS MOONS
+  // ============================================================
   {
     id: 'titania',
     name: 'Titania',
     wikipediaTitle: 'Titania (moon)',
     parentPlanetId: 'uranus',
     type: 'Natural Satellite',
-    radius: 0.48,
+    realRadiusKm: 788.4,
+    radius: 0.44,
     orbitalDistance: 12.0,
     orbitalPeriodDays: 8.706,
     M0: 1.4,
     orbitSpeed: 1.2,
     rotationSpeed: 0.004,
     color: 0x9ca3af,
-    textureType: 'moon',
+    textureType: 'titania',
     diameter: '1,578 km',
     distanceFromPlanet: '435,910 km',
     orbitalPeriod: '8.7 days',
     rotationPeriod: '8.7 days',
-    mass: '3.4 × 10²¹ kg',
+    mass: '3.40 × 10²¹ kg',
     surfaceTemp: '-203 °C',
     composition: 'Equal parts water ice and dense rocky core',
     description: 'The largest moon of Uranus. Cut by giant fault canyons and scarps hundreds of kilometers long.'
@@ -295,14 +413,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Oberon (moon)',
     parentPlanetId: 'uranus',
     type: 'Natural Satellite',
-    radius: 0.45,
+    realRadiusKm: 761.4,
+    radius: 0.43,
     orbitalDistance: 15.5,
     orbitalPeriodDays: 13.46,
     M0: 4.1,
     orbitSpeed: 0.95,
     rotationSpeed: 0.003,
     color: 0x6b7280,
-    textureType: 'phobos',
+    textureType: 'oberon',
     diameter: '1,523 km',
     distanceFromPlanet: '583,520 km',
     orbitalPeriod: '13.5 days',
@@ -318,14 +437,15 @@ export const SATELLITES_DATA = [
     wikipediaTitle: 'Ariel (moon)',
     parentPlanetId: 'uranus',
     type: 'Natural Satellite',
-    radius: 0.4,
+    realRadiusKm: 578.9,
+    radius: 0.38,
     orbitalDistance: 9.0,
     orbitalPeriodDays: 2.520,
     M0: 5.6,
     orbitSpeed: 1.6,
     rotationSpeed: 0.005,
     color: 0xe2e8f0,
-    textureType: 'enceladus',
+    textureType: 'ariel',
     diameter: '1,158 km',
     distanceFromPlanet: '190,900 km',
     orbitalPeriod: '2.52 days',
@@ -333,21 +453,72 @@ export const SATELLITES_DATA = [
     mass: '1.25 × 10²¹ kg',
     surfaceTemp: '-213 °C',
     composition: 'Water ice, carbon dioxide ice, silicate rock',
-    description: 'The brightest surface among Uranus\'s moons, scarred by smooth terrain, impact craters, and interconnected rift valleys.'
+    description: "The brightest surface among Uranus's moons, scarred by smooth terrain, impact craters, and interconnected rift valleys."
+  },
+  {
+    id: 'umbriel',
+    name: 'Umbriel',
+    wikipediaTitle: 'Umbriel (moon)',
+    parentPlanetId: 'uranus',
+    type: 'Natural Satellite',
+    realRadiusKm: 584.7,
+    radius: 0.38,
+    orbitalDistance: 10.5,
+    orbitalPeriodDays: 4.144,
+    M0: 2.9,
+    orbitSpeed: 1.3,
+    rotationSpeed: 0.004,
+    color: 0x475569,
+    textureType: 'umbriel',
+    diameter: '1,169 km',
+    distanceFromPlanet: '266,000 km',
+    orbitalPeriod: '4.14 days',
+    rotationPeriod: '4.14 days',
+    mass: '1.27 × 10²¹ kg',
+    surfaceTemp: '-210 °C',
+    composition: 'Dark carbonaceous materials and water ice',
+    description: 'The darkest moon of Uranus. Features Wunda, a mysterious bright ring of reflective material inside a polar impact crater.'
+  },
+  {
+    id: 'miranda',
+    name: 'Miranda',
+    wikipediaTitle: 'Miranda (moon)',
+    parentPlanetId: 'uranus',
+    type: 'Natural Satellite',
+    realRadiusKm: 235.8,
+    radius: 0.28,
+    orbitalDistance: 7.2,
+    orbitalPeriodDays: 1.413,
+    M0: 0.3,
+    orbitSpeed: 2.0,
+    rotationSpeed: 0.006,
+    color: 0xcbd5e1,
+    textureType: 'miranda',
+    diameter: '471 km',
+    distanceFromPlanet: '129,900 km',
+    orbitalPeriod: '1.41 days',
+    rotationPeriod: '1.41 days',
+    mass: '6.59 × 10¹⁹ kg',
+    surfaceTemp: '-213 °C',
+    composition: 'Water ice and silicate rock jigsaw terrain',
+    description: 'A bizarre Frankenstein moon of giant fault scarps, including Verona Rupes, the tallest cliff face in the Solar System (20 km high).'
   },
 
-  // --- NEPTUNE MOONS ---
+  // ============================================================
+  // NEPTUNE MOONS
+  // ============================================================
   {
     id: 'triton',
     name: 'Triton',
     wikipediaTitle: 'Triton (moon)',
     parentPlanetId: 'neptune',
     type: 'Natural Satellite',
-    radius: 0.62,
+    realRadiusKm: 1353.4,
+    radius: 0.52,
     orbitalDistance: 10.5,
-    orbitalPeriodDays: 5.877, // Retrograde orbit handled visually by negative speed, but mathematically we can just use the period
+    orbitalPeriodDays: 5.877,
     M0: 2.8,
-    orbitSpeed: -1.4, // Keep visual retrograde simulation speed
+    orbitSpeed: -1.4, // Visual retrograde orbit
     rotationSpeed: 0.004,
     color: 0x67e8f9,
     textureType: 'triton',
@@ -358,6 +529,54 @@ export const SATELLITES_DATA = [
     mass: '2.14 × 10²² kg',
     surfaceTemp: '-235 °C (One of the coldest bodies in the Solar System)',
     composition: 'Frozen nitrogen, water ice crust, rock-metal core',
-    description: 'Neptune\'s largest moon, orbiting backwards relative to the planet\'s rotation. A captured Kuiper Belt object featuring nitrogen gas geysers.'
+    description: "Neptune's largest moon, orbiting backwards relative to the planet's rotation. A captured Kuiper Belt object featuring nitrogen gas geysers."
+  },
+  {
+    id: 'proteus',
+    name: 'Proteus',
+    wikipediaTitle: 'Proteus (moon)',
+    parentPlanetId: 'neptune',
+    type: 'Natural Satellite',
+    realRadiusKm: 210.0,
+    radius: 0.27,
+    orbitalDistance: 7.5,
+    orbitalPeriodDays: 1.122,
+    M0: 1.7,
+    orbitSpeed: 2.2,
+    rotationSpeed: 0.007,
+    color: 0x64748b,
+    textureType: 'phobos',
+    diameter: '420 km',
+    distanceFromPlanet: '117,647 km',
+    orbitalPeriod: '27 hours',
+    rotationPeriod: '27 hours',
+    mass: '4.4 × 10¹⁹ kg',
+    surfaceTemp: '-222 °C',
+    composition: 'Dark carbonaceous materials and water ice',
+    description: "Neptune's second-largest moon. Highly non-spherical boxy shape, covered in massive impact craters."
+  },
+  {
+    id: 'nereid',
+    name: 'Nereid',
+    wikipediaTitle: 'Nereid (moon)',
+    parentPlanetId: 'neptune',
+    type: 'Natural Satellite',
+    realRadiusKm: 170.0,
+    radius: 0.25,
+    orbitalDistance: 16.0,
+    orbitalPeriodDays: 360.13,
+    M0: 4.5,
+    orbitSpeed: 0.5,
+    rotationSpeed: 0.003,
+    color: 0x94a3b8,
+    textureType: 'moon',
+    diameter: '340 km',
+    distanceFromPlanet: '5,513,818 km',
+    orbitalPeriod: '360 days',
+    rotationPeriod: '11.5 hours',
+    mass: '3.1 × 10¹⁹ kg',
+    surfaceTemp: '-220 °C',
+    composition: 'Water ice and silicate mineral crust',
+    description: 'Has the most eccentric orbit of any satellite in the Solar System, ranging from 1.4 million to 9.6 million km from Neptune.'
   }
 ];
