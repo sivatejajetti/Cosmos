@@ -22,6 +22,12 @@ export class SatelliteFactory {
     this.visualSimulationMode = enabled;
   }
 
+  setEarthFMMode(enabled) {
+    this.satellites.forEach(s => {
+      s.pivot.visible = !enabled;
+    });
+  }
+
   createSatellitesForPlanet(planetConfig, planetContainer) {
     const moonConfigs = SATELLITES_DATA.filter(s => s.parentPlanetId === planetConfig.id);
     const createdMoons = [];

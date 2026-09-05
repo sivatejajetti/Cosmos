@@ -30,6 +30,16 @@ export class PlanetFactory {
     this.artificialSatelliteFactory.setVisualSimulationMode(enabled);
   }
 
+  setEarthFMMode(enabled) {
+    this.planets.forEach(p => {
+      if (p.config.id !== 'earth') {
+        p.planetContainer.visible = !enabled;
+      }
+    });
+    this.satelliteFactory.setEarthFMMode(enabled);
+    this.artificialSatelliteFactory.setEarthFMMode(enabled);
+  }
+
   init() {
     PLANETS_DATA.forEach(config => {
       const planetData = this.createPlanet(config);

@@ -76,4 +76,30 @@ export class CosmosApi {
       return { success: false, error: 'AI service is not reachable. Check that the backend server is running.', errorCode: 'NETWORK_ERROR' };
     }
   }
+
+  /**
+   * GET /api/v1/radio/nearby — fetch nearby live radio stations for latitude/longitude
+   * @param {number} latitude
+   * @param {number} longitude
+   * @param {number} radius
+   * @returns {Promise<{success:boolean, location:object, searchRadiusKm:number, stations:Array}>}
+   */
+  static async fetchNearbyRadioStations(latitude, longitude, radius = 50) {
+    try {
+      const url = `${this.baseUrl}/radio/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`;
+      const response = await fetch(url);
+      if (response.ok) {
+        const json = await response.json();
+        return json;
+      }
+    } catch (err) {
+      console.warn(`[COSMOS API] Radio endpoint unreachable at ${this.baseUrl}/radio/nearby.`, err);
+    }
+    return {
+      success: false,
+      location: { latitude, longitude, placeName: `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°` },
+      searchRadiusKm: radius,
+      stations: []
+    };
+  }
 }

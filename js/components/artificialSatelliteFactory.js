@@ -27,6 +27,12 @@ export class ArtificialSatelliteFactory {
     this.visualSimulationMode = enabled;
   }
 
+  setEarthFMMode(enabled) {
+    this.spacecraftList.forEach(s => {
+      s.pivot.visible = !enabled;
+    });
+  }
+
   createSpacecraftForParent(parentConfig, parentContainer) {
     const satConfigs = ARTIFICIAL_SATELLITES_DATA.filter(s => s.parentBodyId === parentConfig.id);
     const createdSats = [];

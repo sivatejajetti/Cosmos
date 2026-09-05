@@ -39,9 +39,27 @@ export class CameraAnimator {
   /**
    * Focus camera smoothly on a celestial object mesh
    */
-  focusOnObject(mesh, radius) {
+  focusOnObject(mesh, radiusOrConfig) {
     this.targetMesh = mesh;
-    this.targetRadius = radius;
+    this.isEarthFMZoom = false;
+    if (typeof radiusOrConfig === 'number') {
+      this.targetRadius = radiusOrConfig;
+    } else if (radiusOrConfig && typeof radiusOrConfig.radius === 'number') {
+      this.targetRadius = radiusOrConfig.radius;
+    } else {
+      this.targetRadius = 2.2;
+    }
+    this.isFocusing = true;
+    this.isResetting = false;
+  }
+
+  /**
+   * Focus camera smoothly close-up on Earth for Earth FM mode
+   */
+  focusEarthFM(mesh) {
+    this.targetMesh = mesh;
+    this.targetRadius = 2.2;
+    this.isEarthFMZoom = true;
     this.isFocusing = true;
     this.isResetting = false;
   }
@@ -73,7 +91,8 @@ export class CameraAnimator {
       this.goalTargetPos.copy(worldPos);
 
       // Optimal viewing offset based on radius
-      const offsetDist = Math.max(22, this.targetRadius * 3.4 + 10);
+      // In Earth FM mode, zoom close so Earth fills the viewport (offsetDist = 5.2)
+      const offsetDist = this.isEarthFMZoom ? 5.2 : Math.max(22, this.targetRadius * 3.4 + 10);
       
       const currentDir = new THREE.Vector3().subVectors(this.camera.position, this.controls.target);
       if (currentDir.lengthSq() < 0.1) currentDir.set(0, 1, 2);

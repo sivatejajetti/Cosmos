@@ -13,6 +13,7 @@ import { TopNav } from './ui/topNav.js';
 import { SimControls } from './ui/simControls.js';
 import { HelpModal } from './ui/helpModal.js';
 import { InfoPanel } from './ui/infoPanel.js';
+import { EarthFMManager } from './components/earthFMManager.js';
 
 /**
  * Main Application Core — Segment 6 Wikipedia & Clickable Satellite System
@@ -75,10 +76,23 @@ class Application {
       if (s.labelSprite) this.interactionManager.registerTarget(s.labelSprite, s.config);
     });
 
-    // 6. UI Modules
+    // 6. UI Modules & Earth FM Component
     this.uiOverlay = new UIOverlay();
     this.infoPanel = new InfoPanel();
     this.helpModal = new HelpModal();
+
+    this.earthFMManager = new EarthFMManager(
+      this.sceneManager.scene,
+      this.sceneManager.camera,
+      this.sceneManager.renderer.domElement,
+      this.cameraAnimator
+    );
+
+    const earthObj = this.planetFactory.planets.find(p => p.config.id === 'earth');
+    if (earthObj) {
+      this.earthFMManager.setEarthMesh(earthObj.planetMesh);
+    }
+    this.interactionManager.setEarthFMManager(this.earthFMManager);
 
     this.simControls = new SimControls(
       (speed) => { this.timeMultiplier = speed; },
@@ -125,6 +139,28 @@ class Application {
   }
 
   setupCallbacks() {
+    // Earth FM Callback
+    this.infoPanel.onExploreEarthFMCallback = () => {
+      const earthObj = this.planetFactory.planets.find(p => p.config.id === 'earth');
+      if (earthObj) {
+        this.earthFMManager.enterEarthFM(earthObj.planetMesh, earthObj.config);
+      }
+    };
+
+    this.earthFMManager.onEnterCallback = () => {
+      // Hide Sun, other planets, moons, satellites, and orbit lines
+      if (this.sun && this.sun.mesh) this.sun.mesh.visible = false;
+      this.planetFactory.setEarthFMMode(true);
+      this.planetFactory.setOrbitPathsVisible(false);
+    };
+
+    this.earthFMManager.onExitCallback = () => {
+      // Restore Sun, other planets, moons, satellites, and orbit lines
+      if (this.sun && this.sun.mesh) this.sun.mesh.visible = true;
+      this.planetFactory.setEarthFMMode(false);
+      this.planetFactory.setOrbitPathsVisible(true);
+      this.planetFactory.setActiveFocusParent('earth');
+    };
     // On Celestial Object Selected (Planet, Moon, or Artificial Spacecraft)
     this.interactionManager.onSelectCallback = (data, mesh) => {
       this.infoPanel.show(data);

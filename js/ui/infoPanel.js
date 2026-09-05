@@ -131,6 +131,11 @@ export class InfoPanel {
       </div>
 
       <div class="panel-actions-footer">
+        ${data.id === 'earth' ? `
+          <button class="btn-action btn-earth-fm" id="panel-btn-earth-fm">
+            🌍 EXPLORE EARTH FM
+          </button>
+        ` : ''}
         ${parentId ? `
           <button class="btn-action btn-parent" id="panel-btn-parent">
             &larr; BACK TO ${parentPlanet.name.toUpperCase()}
@@ -156,6 +161,15 @@ export class InfoPanel {
       this.hide();
       if (this.onCloseCallback) this.onCloseCallback();
     });
+
+    // Earth FM Button
+    const earthFMBtn = document.getElementById('panel-btn-earth-fm');
+    if (earthFMBtn) {
+      earthFMBtn.addEventListener('click', () => {
+        this.hide();
+        if (this.onExploreEarthFMCallback) this.onExploreEarthFMCallback();
+      });
+    }
 
     // Action Buttons
     const focusBtn = document.getElementById('panel-btn-focus');

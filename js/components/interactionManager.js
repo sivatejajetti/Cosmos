@@ -20,8 +20,13 @@ export class InteractionManager {
 
     this.onSelectCallback = null;
     this.onDeselectCallback = null;
+    this.earthFMManager = null;
 
     this.init();
+  }
+
+  setEarthFMManager(mgr) {
+    this.earthFMManager = mgr;
   }
 
   registerTarget(mesh, data) {
@@ -75,6 +80,16 @@ export class InteractionManager {
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // If Earth FM mode is active, raycast directly onto the Earth sphere
+    if (this.earthFMManager && this.earthFMManager.earthFMMode && this.earthFMManager.earthMesh) {
+      const earthIntersects = this.raycaster.intersectObject(this.earthFMManager.earthMesh, true);
+      if (earthIntersects.length > 0) {
+        this.earthFMManager.handleEarthClick(earthIntersects[0].point);
+        return;
+      }
+    }
+
     const meshes = this.interactiveTargets.map(t => t.mesh);
     const intersects = this.raycaster.intersectObjects(meshes, true);
 
@@ -84,7 +99,9 @@ export class InteractionManager {
         this.selectObject(targetObj.mesh, targetObj.data);
       }
     } else {
-      this.deselect();
+      if (!this.earthFMManager || !this.earthFMManager.earthFMMode) {
+        this.deselect();
+      }
     }
   }
 

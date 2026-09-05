@@ -8,9 +8,10 @@ import healthRoutes from './routes/healthRoutes.js';
 import objectRoutes from './routes/objectRoutes.js';
 import wikiRoutes from './routes/wikiRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import radioRoutes from './routes/radioRoutes.js';
 
 /**
- * COSMOS Node.js + Express API Backend Server (Segment 7 AI Explanation)
+ * COSMOS Node.js + Express API Backend Server (Earth FM Radio Integration)
  */
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/v1', healthRoutes);
 app.use('/api/v1', objectRoutes);
 app.use('/api/v1', wikiRoutes);
 app.use('/api/v1', aiRoutes);
+app.use('/api/v1', radioRoutes);
 
 // 3. Fallback Route & Error Handling Middleware
 app.use(notFoundHandler);
@@ -37,6 +39,7 @@ const server = app.listen(ENV.PORT, () => {
   console.log(`🌌 Objects API:  http://localhost:${ENV.PORT}/api/v1/objects`);
   console.log(`📚 Wikipedia:    http://localhost:${ENV.PORT}/api/v1/wikipedia/earth`);
   console.log(`🤖 AI Explain:   http://localhost:${ENV.PORT}/api/v1/ai/explain`);
+  console.log(`📻 Earth FM:     http://localhost:${ENV.PORT}/api/v1/radio/nearby?latitude=20.59&longitude=78.96`);
   console.log(`================================================`);
 });
 
