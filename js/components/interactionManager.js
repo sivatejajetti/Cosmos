@@ -85,7 +85,7 @@ export class InteractionManager {
     if (this.earthFMManager && this.earthFMManager.earthFMMode && this.earthFMManager.earthMesh) {
       const earthIntersects = this.raycaster.intersectObject(this.earthFMManager.earthMesh, true);
       if (earthIntersects.length > 0) {
-        this.earthFMManager.handleEarthClick(earthIntersects[0].point);
+        this.earthFMManager.handleEarthClick(earthIntersects[0].point, earthIntersects[0].object);
         return;
       }
     }

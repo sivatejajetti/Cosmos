@@ -297,19 +297,32 @@ export class EarthFMManager {
   }
 
   /**
-   * Handles user click/tap on 3D Earth sphere
+   * Handles user click/tap on 3D Earth sphere or 3D Country Labels
    */
-  handleEarthClick(intersectionPoint) {
+  handleEarthClick(intersectionPoint, intersectedObject = null) {
     if (!this.earthFMMode || !this.earthMesh) return;
 
-    // Convert 3D point → Latitude / Longitude
-    const coords = this.convertPointToLatLon(this.earthMesh, intersectionPoint);
-    this.selectedLocation = {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      placeName: 'Locating...',
-      localPoint: coords.localPoint
-    };
+    let coords;
+    // Check if user clicked directly on a 3D Country Label sprite
+    if (intersectedObject && intersectedObject.userData && intersectedObject.userData.isCountryLabel) {
+      const c = intersectedObject.userData.country;
+      const localPoint = this.convertLatLonToLocalVector(c.lat, c.lon, 2.2, 0.08);
+      coords = { latitude: c.lat, longitude: c.lon, localPoint };
+      this.selectedLocation = {
+        latitude: c.lat,
+        longitude: c.lon,
+        placeName: c.name,
+        localPoint
+      };
+    } else {
+      coords = this.convertPointToLatLon(this.earthMesh, intersectionPoint);
+      this.selectedLocation = {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        placeName: 'Locating...',
+        localPoint: coords.localPoint
+      };
+    }
 
     // Create 3D pin marker attached to Earth mesh
     this.create3DMarker(coords.localPoint);
@@ -321,6 +334,7 @@ export class EarthFMManager {
     // Render loading location UI
     this.loadingStations = true;
     this.stations = [];
+    this.searchQuery = '';
     this.renderLocationInfoUI();
     this.renderStationListUI();
 
@@ -403,6 +417,19 @@ export class EarthFMManager {
     this.renderStationListUI();
   }
 
+  getFilteredStations() {
+    if (!this.stations) return [];
+    if (!this.searchQuery) return this.stations;
+    const q = this.searchQuery.toLowerCase().trim();
+    return this.stations.filter(s =>
+      (s.name && s.name.toLowerCase().includes(q)) ||
+      (s.genre && s.genre.toLowerCase().includes(q)) ||
+      (s.city && s.city.toLowerCase().includes(q)) ||
+      (s.country && s.country.toLowerCase().includes(q)) ||
+      (s.frequency && s.frequency.toLowerCase().includes(q))
+    );
+  }
+
   renderLocationInfoUI() {
     if (!this.selectedLocation) {
       this.panelContainer.innerHTML = `
@@ -411,7 +438,7 @@ export class EarthFMManager {
             <span class="efm-loc-icon">📍</span>
             <span class="efm-loc-title">NO LOCATION SELECTED</span>
           </div>
-          <p class="efm-loc-text">Click anywhere on the 3D Earth globe to discover local live FM radio streams.</p>
+          <p class="efm-loc-text">Click anywhere on the 3D Earth globe or select a country label to discover live radio streams.</p>
         </div>
       `;
       return;
@@ -420,6 +447,7 @@ export class EarthFMManager {
     const loc = this.selectedLocation;
     const latStr = `${Math.abs(loc.latitude).toFixed(2)}° ${loc.latitude >= 0 ? 'N' : 'S'}`;
     const lonStr = `${Math.abs(loc.longitude).toFixed(2)}° ${loc.longitude >= 0 ? 'E' : 'W'}`;
+    const filtered = this.getFilteredStations();
 
     this.panelContainer.innerHTML = `
       <div class="efm-location-card">
@@ -435,15 +463,39 @@ export class EarthFMManager {
         ` : ''}
       </div>
 
+      ${this.stations.length > 3 ? `
+        <div class="efm-search-container">
+          <span class="efm-search-icon">🔍</span>
+          <input type="text" id="efm-search-input" class="efm-search-input" placeholder="Search station, genre, city..." value="${this.searchQuery || ''}" />
+          ${this.searchQuery ? `<button id="efm-search-clear" class="efm-search-clear">✕</button>` : ''}
+        </div>
+      ` : ''}
+
       <div class="efm-stations-header">
         <span class="efm-sh-title">LOCAL RADIO STATIONS</span>
-        <span class="efm-sh-count">${this.loadingStations ? 'Searching...' : `${this.stations.length} Available`}</span>
+        <span class="efm-sh-count">${this.loadingStations ? 'Searching...' : `${filtered.length} Available`}</span>
       </div>
 
       <div id="efm-stations-list" class="efm-stations-list">
         ${this.renderStationsMarkup()}
       </div>
     `;
+
+    // Wire Search Input Listener
+    const searchInput = document.getElementById('efm-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        this.searchQuery = e.target.value;
+        this.renderStationListUI();
+      });
+    }
+    const searchClear = document.getElementById('efm-search-clear');
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        this.searchQuery = '';
+        this.renderLocationInfoUI();
+      });
+    }
 
     this.wireStationCardListeners();
   }
@@ -459,22 +511,25 @@ export class EarthFMManager {
       `;
     }
 
-    if (!this.stations || this.stations.length === 0) {
+    const filtered = this.getFilteredStations();
+
+    if (!filtered || filtered.length === 0) {
       return `
         <div class="efm-placeholder">
           <span class="efm-ph-icon">📻</span>
-          <span class="efm-ph-title">No Stations Found</span>
-          <span class="efm-ph-sub">No active radio streams were detected near this location. Try selecting a nearby city or country on the globe.</span>
+          <span class="efm-ph-title">${this.searchQuery ? 'No Matching Stations' : 'No Stations Found'}</span>
+          <span class="efm-ph-sub">${this.searchQuery ? 'Try clearing your search query.' : 'No active radio streams were detected near this location. Try selecting a nearby city or country label.'}</span>
         </div>
       `;
     }
 
-    return this.stations.map((st, idx) => {
+    return filtered.map((st, idx) => {
+      const originalIdx = this.stations.indexOf(st);
       const isThisActive = this.activeStation && this.activeStation.id === st.id;
       const isThisPlaying = isThisActive && this.isPlaying;
 
       return `
-        <div class="efm-station-card ${isThisActive ? 'active' : ''}" data-station-idx="${idx}">
+        <div class="efm-station-card ${isThisActive ? 'active' : ''}" data-station-idx="${originalIdx}">
           <div class="st-logo-box">
             ${st.logo ? `<img src="${st.logo}" alt="${st.name}" class="st-logo-img" onerror="this.style.display='none'" />` : ''}
             <span class="st-default-icon">🎵</span>
@@ -486,7 +541,7 @@ export class EarthFMManager {
             <span class="st-genre">${st.genre || 'Music'} ${st.language ? `&bull; ${st.language}` : ''}</span>
           </div>
 
-          <button class="st-play-btn ${isThisPlaying ? 'playing' : ''}" data-station-idx="${idx}">
+          <button class="st-play-btn ${isThisPlaying ? 'playing' : ''}" data-station-idx="${originalIdx}">
             ${isThisPlaying ? '❚❚' : '▶'}
           </button>
         </div>
@@ -589,6 +644,12 @@ export class EarthFMManager {
           <div class="ab-details">
             <div class="ab-title-row">
               <span class="ab-live-badge ${this.isPlaying ? 'active' : ''}">🔴 LIVE</span>
+              <div class="ab-equalizer ${this.isPlaying ? 'active' : ''}">
+                <span class="eq-bar bar-1"></span>
+                <span class="eq-bar bar-2"></span>
+                <span class="eq-bar bar-3"></span>
+                <span class="eq-bar bar-4"></span>
+              </div>
               <h4 class="ab-st-name">${st.name}</h4>
             </div>
             <span class="ab-st-sub">${st.city ? `${st.city}, ` : ''}${st.country} &bull; ${st.frequency} &bull; ${st.genre}</span>
