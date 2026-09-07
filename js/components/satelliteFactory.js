@@ -167,7 +167,7 @@ export class SatelliteFactory {
   setActiveParentId(parentId) {
     this.activeParentId = parentId;
     this.satellites.forEach(s => {
-      const isParentActive = Boolean(parentId) && (s.config.parentPlanetId === parentId);
+      const isParentActive = Boolean(parentId) && (s.config.parentPlanetId === parentId || s.config.parentBodyId === parentId);
       s.labelSprite.visible = isParentActive && this.labelsVisible;
       s.orbitLine.visible = isParentActive && this.orbitsVisible;
     });

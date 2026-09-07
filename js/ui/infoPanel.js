@@ -117,13 +117,13 @@ export class InfoPanel {
       </div>
 
       <div class="panel-tabs-header">
-        <button class="tab-btn ${this.activeTab === 'overview' ? 'active' : ''}" data-tab="overview">Overview</button>
-        <button class="tab-btn ${this.activeTab === 'wiki' ? 'active' : ''}" data-tab="wiki">📚 Wikipedia</button>
-        <button class="tab-btn ${this.activeTab === 'science' ? 'active' : ''}" data-tab="science">${isArtificial ? 'Mission & History' : 'Scientific Data'}</button>
-        <button class="tab-btn ${this.activeTab === 'satellites' ? 'active' : ''}" data-tab="satellites">
-          ${isArtificial || isMoon ? 'Parent Body' : 'Satellites'}
+        <button class="tab-btn ${this.activeTab === 'overview' ? 'active' : ''}" data-tab="overview" title="Overview">Overview</button>
+        <button class="tab-btn ${this.activeTab === 'wiki' ? 'active' : ''}" data-tab="wiki" title="Wikipedia Article">Wikipedia</button>
+        <button class="tab-btn ${this.activeTab === 'science' ? 'active' : ''}" data-tab="science" title="${isArtificial ? 'Mission Specs & History' : 'Scientific Data'}">${isArtificial ? 'Specs' : 'Science'}</button>
+        <button class="tab-btn ${this.activeTab === 'satellites' ? 'active' : ''}" data-tab="satellites" title="${isArtificial || isMoon ? 'Parent Body' : 'Satellites & Moons'}">
+          ${isArtificial || isMoon ? 'Parent' : 'Moons'}
         </button>
-        <button class="tab-btn ${this.activeTab === 'ai' ? 'active' : ''}" data-tab="ai">✦ AI</button>
+        <button class="tab-btn ${this.activeTab === 'ai' ? 'active' : ''}" data-tab="ai" title="AI Assistant Explanation">✦ AI</button>
       </div>
 
       <div class="panel-tab-body">

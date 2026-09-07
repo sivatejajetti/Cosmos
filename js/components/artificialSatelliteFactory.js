@@ -207,7 +207,7 @@ export class ArtificialSatelliteFactory {
   setActiveParentId(parentId) {
     this.activeParentId = parentId;
     this.spacecraftList.forEach(s => {
-      const isParentActive = Boolean(parentId) && (s.config.parentBodyId === parentId);
+      const isParentActive = Boolean(parentId) && (s.config.parentBodyId === parentId || s.config.parentPlanetId === parentId);
       const isLayerVisible = this.layerVisibility[s.config.layer] !== false;
       
       s.labelSprite.visible = isParentActive && isLayerVisible && this.labelsVisible;
