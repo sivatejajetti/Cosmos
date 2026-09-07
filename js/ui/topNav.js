@@ -119,6 +119,25 @@ export class TopNav {
         if (this.onOpenHelp) this.onOpenHelp();
       });
     }
+
+    // Start Live UTC Clock
+    this.startUTCClock();
+  }
+
+  startUTCClock() {
+    this.updateUTCClock();
+    setInterval(() => this.updateUTCClock(), 1000);
+  }
+
+  updateUTCClock() {
+    const clockEl = document.getElementById('utc-clock-time');
+    if (clockEl) {
+      const now = new Date();
+      const h = String(now.getUTCHours()).padStart(2, '0');
+      const m = String(now.getUTCMinutes()).padStart(2, '0');
+      const s = String(now.getUTCSeconds()).padStart(2, '0');
+      clockEl.textContent = `${h}:${m}:${s} UTC`;
+    }
   }
 
   updateBreadcrumb(data) {

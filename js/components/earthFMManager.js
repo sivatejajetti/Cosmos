@@ -138,14 +138,31 @@ export class EarthFMManager {
     }
   }
 
-  createCountryLabelSprite(countryName) {
+  getLocalSolarStatus(lat, lon, date = new Date()) {
+    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+    const localSolarHours = (utcHours + (lon / 15) + 24) % 24;
+
+    if (localSolarHours >= 5.25 && localSolarHours < 7.25) {
+      return { code: 'SUNRISE', icon: '🌅', label: 'SUNRISE', color: '#fbbf24' };
+    } else if (localSolarHours >= 7.25 && localSolarHours < 17.25) {
+      return { code: 'DAYTIME', icon: '☀️', label: 'DAYTIME', color: '#38bdf8' };
+    } else if (localSolarHours >= 17.25 && localSolarHours < 19.25) {
+      return { code: 'SUNSET', icon: '🌇', label: 'SUNSET', color: '#f97316' };
+    } else {
+      return { code: 'NIGHTTIME', icon: '🌙', label: 'NIGHTTIME', color: '#818cf8' };
+    }
+  }
+
+  createCountryLabelSprite(countryName, lat = 0, lon = 0) {
+    const solar = this.getLocalSolarStatus(lat, lon);
+
     const canvas = document.createElement('canvas');
-    canvas.width = 320;
+    canvas.width = 384;
     canvas.height = 64;
     const ctx = canvas.getContext('2d');
 
     // Transparent background — no background box or border
-    ctx.clearRect(0, 0, 320, 64);
+    ctx.clearRect(0, 0, 384, 64);
 
     // Outer glow & dark shadow for crisp contrast over land & ocean
     ctx.shadowColor = 'rgba(4, 9, 20, 0.95)';
@@ -156,15 +173,15 @@ export class EarthFMManager {
     // Dark text outline
     ctx.strokeStyle = 'rgba(4, 9, 20, 0.9)';
     ctx.lineWidth = 4;
-    ctx.font = '800 17px "Space Grotesk", sans-serif';
+    ctx.font = '800 16px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const textStr = `📍 ${countryName.toUpperCase()}`;
-    ctx.strokeText(textStr, 160, 32);
+    const textStr = `📍 ${countryName.toUpperCase()} • ${solar.icon} ${solar.label}`;
+    ctx.strokeText(textStr, 192, 32);
 
-    // Bright glowing cyan text fill
-    ctx.fillStyle = '#38bdf8';
-    ctx.fillText(textStr, 160, 32);
+    // Bright glowing solar text fill
+    ctx.fillStyle = solar.color || '#38bdf8';
+    ctx.fillText(textStr, 192, 32);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
@@ -175,7 +192,7 @@ export class EarthFMManager {
     });
 
     const sprite = new THREE.Sprite(spriteMat);
-    sprite.scale.set(1.5, 0.3, 1);
+    sprite.scale.set(1.8, 0.3, 1);
     return sprite;
   }
 
@@ -190,7 +207,7 @@ export class EarthFMManager {
 
     COUNTRY_LOCATIONS.forEach(c => {
       const localPos = this.convertLatLonToLocalVector(c.lat, c.lon, earthRadius, 0.12);
-      const sprite = this.createCountryLabelSprite(c.name);
+      const sprite = this.createCountryLabelSprite(c.name, c.lat, c.lon);
       sprite.position.copy(localPos);
       sprite.userData = { country: c, isCountryLabel: true };
       this.countryLabelsGroup.add(sprite);
@@ -447,6 +464,7 @@ export class EarthFMManager {
     const loc = this.selectedLocation;
     const latStr = `${Math.abs(loc.latitude).toFixed(2)}° ${loc.latitude >= 0 ? 'N' : 'S'}`;
     const lonStr = `${Math.abs(loc.longitude).toFixed(2)}° ${loc.longitude >= 0 ? 'E' : 'W'}`;
+    const solar = this.getLocalSolarStatus(loc.latitude, loc.longitude);
     const filtered = this.getFilteredStations();
 
     this.panelContainer.innerHTML = `
@@ -458,6 +476,11 @@ export class EarthFMManager {
             <span class="efm-coords">${latStr} &bull; ${lonStr}</span>
           </div>
         </div>
+
+        <div class="efm-solar-status-badge" style="color: ${solar.color}; background: ${solar.color}15; border-color: ${solar.color}40;">
+          <span>${solar.icon} SOLAR CYCLE: <b>${solar.label}</b></span>
+        </div>
+
         ${this.searchRadiusKm > 50 ? `
           <div class="efm-radius-badge">Showing stations within ${this.searchRadiusKm} km</div>
         ` : ''}

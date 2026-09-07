@@ -291,9 +291,8 @@ export function getLiveRotationAngle(config, date = new Date(), orbitAngle = 0) 
 
   if (config.id === 'earth') {
     // Synchronize Greenwich Meridian (Lon 0) with UTC solar noon (12:00:00 UTC)
-    const solarOffset = orbitAngle + Math.PI;
-    const utcSpinAngle = (dayFraction - 0.5) * Math.PI * 2;
-    return solarOffset + utcSpinAngle;
+    // At 12:00:00 UTC (dayFraction = 0.5), Greenwich faces Sun at (0, 0, 0)
+    return (dayFraction * Math.PI * 2) - orbitAngle;
   }
 
   const isRetrograde = (config.rotationSpeed && config.rotationSpeed < 0) || config.id === 'venus' || config.id === 'uranus';

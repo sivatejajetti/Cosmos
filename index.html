@@ -55,6 +55,16 @@
   <!-- 4. Top Navigation Bar & HUD Header -->
   <header class="app-header">
     <div class="header-left">
+      <!-- Burger Menu Button for Controls & Settings -->
+      <button id="burger-menu-btn" class="burger-menu-btn" title="Toggle Controls & Settings">
+        <span class="burger-lines">
+          <span class="line"></span>
+          <span class="line"></span>
+          <span class="line"></span>
+        </span>
+        <span class="burger-label">CONTROLS</span>
+      </button>
+
       <div class="logo-container">
         <div class="logo-icon"></div>
         <h1 class="logo-text">COSMOS</h1>
@@ -62,6 +72,11 @@
       <!-- Hierarchical Breadcrumb Location Indicator -->
       <div id="nav-breadcrumb" class="nav-breadcrumb">
         <span class="bc-item active">SOLAR SYSTEM</span>
+      </div>
+      <!-- Real-Time UTC Live Clock -->
+      <div id="utc-clock-badge" class="utc-clock-badge" title="Coordinated Universal Time (UTC) Real-Time Solar Sync Clock">
+        <span class="utc-clock-dot"></span>
+        <span id="utc-clock-time" class="utc-clock-time">00:00:00 UTC</span>
       </div>
     </div>
 
@@ -89,79 +104,83 @@
     <div class="control-badge"><span class="mouse-icon">🖱️</span> Drag to Orbit / Click Object</div>
   </div>
 
-  <!-- 6. Simulation Control Bar (Bottom HUD) -->
-  <div id="sim-controls-bar" class="sim-controls-bar">
-    <!-- Visual Motion Simulation Mode Switch -->
-    <div class="sim-section">
-      <span class="sim-label">SIMULATION MODE</span>
-      <div class="toggle-group">
-        <label class="switch-label visual-sim-switch" title="Toggle visual movement simulation so planets & satellites visibly orbit and rotate">
-          <input type="checkbox" id="toggle-visual-simulation" checked>
-          <span class="switch-slider highlight-slider"></span>
-          <span class="switch-text highlight-text">⚡ Motion Simulation</span>
-        </label>
+  <!-- 6. Left Slide-Out Simulation Controls Burger Drawer -->
+  <div id="sim-controls-drawer" class="sim-controls-drawer">
+    <div class="drawer-panel-header">
+      <div class="drawer-panel-title">
+        <span class="drawer-title-icon">⚙</span>
+        <span>SIMULATION CONTROLS</span>
       </div>
+      <button id="drawer-panel-close" class="drawer-panel-close" title="Close Controls Panel">✕</button>
     </div>
 
-    <div class="sim-divider"></div>
-
-    <!-- Time Speed Selector -->
-    <div class="sim-section">
-      <span class="sim-label">TIME SPEED</span>
-      <div class="speed-btn-group">
-        <button class="speed-btn" data-speed="0">PAUSE</button>
-        <button class="speed-btn active" data-speed="1">1×</button>
-        <button class="speed-btn" data-speed="10">10×</button>
-        <button class="speed-btn" data-speed="100">100×</button>
-        <button class="speed-btn" data-speed="1000">1000×</button>
+    <div class="drawer-panel-body">
+      <!-- Visual Motion Simulation Mode Switch -->
+      <div class="sim-panel-section">
+        <span class="sim-label">SIMULATION MODE</span>
+        <div class="toggle-group-panel">
+          <label class="switch-label visual-sim-switch" title="Toggle visual movement simulation so planets & satellites visibly orbit and rotate">
+            <input type="checkbox" id="toggle-visual-simulation" checked>
+            <span class="switch-slider highlight-slider"></span>
+            <span class="switch-text highlight-text">⚡ Motion Simulation</span>
+          </label>
+        </div>
       </div>
-    </div>
 
-    <div class="sim-divider"></div>
-
-    <!-- Display Toggles -->
-    <div class="sim-section">
-      <span class="sim-label">DISPLAY</span>
-      <div class="toggle-group">
-        <label class="switch-label">
-          <input type="checkbox" id="toggle-orbit-paths" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Orbit Paths</span>
-        </label>
-        <label class="switch-label">
-          <input type="checkbox" id="toggle-planet-labels" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Labels</span>
-        </label>
+      <!-- Time Speed Selector -->
+      <div class="sim-panel-section">
+        <span class="sim-label">TIME SPEED</span>
+        <div class="speed-btn-group-panel">
+          <button class="speed-btn" data-speed="0">PAUSE</button>
+          <button class="speed-btn active" data-speed="1">1×</button>
+          <button class="speed-btn" data-speed="10">10×</button>
+          <button class="speed-btn" data-speed="100">100×</button>
+          <button class="speed-btn" data-speed="1000">1000×</button>
+        </div>
       </div>
-    </div>
 
-    <div class="sim-divider"></div>
+      <!-- Display Toggles -->
+      <div class="sim-panel-section">
+        <span class="sim-label">DISPLAY VISIBILITY</span>
+        <div class="toggle-group-panel">
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-orbit-paths" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Orbit Paths</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" id="toggle-planet-labels" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Labels</span>
+          </label>
+        </div>
+      </div>
 
-    <!-- Satellite Layer Toggles -->
-    <div class="sim-section">
-      <span class="sim-label">LAYERS</span>
-      <div class="toggle-group">
-        <label class="switch-label">
-          <input type="checkbox" class="layer-checkbox" data-layer="moons" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Moons</span>
-        </label>
-        <label class="switch-label">
-          <input type="checkbox" class="layer-checkbox" data-layer="pioneers" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Pioneers</span>
-        </label>
-        <label class="switch-label">
-          <input type="checkbox" class="layer-checkbox" data-layer="earth-sats" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Earth Satellites</span>
-        </label>
-        <label class="switch-label">
-          <input type="checkbox" class="layer-checkbox" data-layer="deep-space" checked>
-          <span class="switch-slider"></span>
-          <span class="switch-text">Deep Space</span>
-        </label>
+      <!-- Satellite Layer Toggles -->
+      <div class="sim-panel-section">
+        <span class="sim-label">CELESTIAL LAYERS</span>
+        <div class="toggle-group-panel grid-2col">
+          <label class="switch-label">
+            <input type="checkbox" class="layer-checkbox" data-layer="moons" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Moons</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" class="layer-checkbox" data-layer="pioneers" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Pioneers</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" class="layer-checkbox" data-layer="earth-sats" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Earth Satellites</span>
+          </label>
+          <label class="switch-label">
+            <input type="checkbox" class="layer-checkbox" data-layer="deep-space" checked>
+            <span class="switch-slider"></span>
+            <span class="switch-text">Deep Space</span>
+          </label>
+        </div>
       </div>
     </div>
   </div>

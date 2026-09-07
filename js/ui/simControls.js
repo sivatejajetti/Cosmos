@@ -18,6 +18,40 @@ export class SimControls {
   }
 
   init() {
+    this.drawerEl = document.getElementById('sim-controls-drawer');
+    this.burgerBtn = document.getElementById('burger-menu-btn');
+    this.closeBtn = document.getElementById('drawer-panel-close');
+
+    // Toggle Burger Menu Left Drawer
+    if (this.burgerBtn) {
+      this.burgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleDrawer();
+      });
+    }
+
+    if (this.closeBtn) {
+      this.closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeDrawer();
+      });
+    }
+
+    // Close drawer when clicking outside or pressing Escape key
+    document.addEventListener('click', (e) => {
+      if (this.drawerEl && this.drawerEl.classList.contains('open')) {
+        if (!this.drawerEl.contains(e.target) && !this.burgerBtn.contains(e.target)) {
+          this.closeDrawer();
+        }
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.drawerEl && this.drawerEl.classList.contains('open')) {
+        this.closeDrawer();
+      }
+    });
+
     // Motion Simulation Toggle Switch
     const toggleVisualSim = document.getElementById('toggle-visual-simulation');
     if (toggleVisualSim) {
@@ -65,6 +99,26 @@ export class SimControls {
         if (this.onToggleLayer) this.onToggleLayer(layerName, e.target.checked);
       });
     });
+  }
+
+  toggleDrawer() {
+    if (!this.drawerEl) return;
+    const isOpen = this.drawerEl.classList.contains('open');
+    if (isOpen) {
+      this.closeDrawer();
+    } else {
+      this.openDrawer();
+    }
+  }
+
+  openDrawer() {
+    if (this.drawerEl) this.drawerEl.classList.add('open');
+    if (this.burgerBtn) this.burgerBtn.classList.add('active');
+  }
+
+  closeDrawer() {
+    if (this.drawerEl) this.drawerEl.classList.remove('open');
+    if (this.burgerBtn) this.burgerBtn.classList.remove('active');
   }
 
   setSpeed(speedVal) {
