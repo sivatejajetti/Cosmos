@@ -102,4 +102,43 @@ export class CosmosApi {
       stations: []
     };
   }
+
+  /**
+   * GET /api/v1/nasa/epic — Live full-globe Earth images from NASA DSCOVR satellite
+   */
+  static async getNasaEpicImages() {
+    try {
+      const response = await fetch(`${this.baseUrl}/nasa/epic`);
+      if (response.ok) return await response.json();
+    } catch (err) {
+      console.warn(`[COSMOS API] NASA EPIC endpoint unreachable at ${this.baseUrl}/nasa/epic.`);
+    }
+    return { success: false, images: [] };
+  }
+
+  /**
+   * GET /api/v1/nasa/asteroids — Live Near-Earth Asteroids tracked by NASA NeoWs
+   */
+  static async getNearEarthAsteroids() {
+    try {
+      const response = await fetch(`${this.baseUrl}/nasa/asteroids`);
+      if (response.ok) return await response.json();
+    } catch (err) {
+      console.warn(`[COSMOS API] NASA Asteroids endpoint unreachable at ${this.baseUrl}/nasa/asteroids.`);
+    }
+    return { success: false, asteroids: [] };
+  }
+
+  /**
+   * GET /api/v1/satellites/tle — Live satellite TLE orbit data from CelesTrak / NORAD
+   */
+  static async getLiveSatelliteTLE(group = 'active') {
+    try {
+      const response = await fetch(`${this.baseUrl}/satellites/tle?group=${encodeURIComponent(group)}`);
+      if (response.ok) return await response.json();
+    } catch (err) {
+      console.warn(`[COSMOS API] Live Satellite TLE endpoint unreachable at ${this.baseUrl}/satellites/tle.`);
+    }
+    return { success: false, satellites: [] };
+  }
 }

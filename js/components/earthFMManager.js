@@ -140,31 +140,31 @@ export class EarthFMManager {
 
   createCountryLabelSprite(countryName) {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
+    canvas.width = 320;
     canvas.height = 64;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = 'rgba(8, 15, 30, 0.88)';
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
-    ctx.lineWidth = 2.5;
-    
-    const r = 8;
-    const x = 6, y = 6, w = 244, h = 52;
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    // Transparent background — no background box or border
+    ctx.clearRect(0, 0, 320, 64);
 
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 16px "Space Grotesk", sans-serif';
+    // Outer glow & dark shadow for crisp contrast over land & ocean
+    ctx.shadowColor = 'rgba(4, 9, 20, 0.95)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+
+    // Dark text outline
+    ctx.strokeStyle = 'rgba(4, 9, 20, 0.9)';
+    ctx.lineWidth = 4;
+    ctx.font = '800 17px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`📍 ${countryName.toUpperCase()}`, 128, 32);
+    const textStr = `📍 ${countryName.toUpperCase()}`;
+    ctx.strokeText(textStr, 160, 32);
+
+    // Bright glowing cyan text fill
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText(textStr, 160, 32);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
@@ -175,7 +175,7 @@ export class EarthFMManager {
     });
 
     const sprite = new THREE.Sprite(spriteMat);
-    sprite.scale.set(1.3, 0.32, 1);
+    sprite.scale.set(1.5, 0.3, 1);
     return sprite;
   }
 
@@ -343,7 +343,7 @@ export class EarthFMManager {
   }
 
   /**
-   * Creates or updates a 3D location marker attached to Earth mesh
+   * Creates or updates a 3D location marker attached to Earth mesh (Compact Sleek Pointer)
    */
   create3DMarker(localPoint) {
     if (!this.earthMesh) return;
@@ -353,18 +353,18 @@ export class EarthFMManager {
     this.markerGroup = new THREE.Group();
     this.markerGroup.name = 'earth-fm-pin-marker';
 
-    const earthRadius = this.earthMesh.geometry.parameters.radius || 2.2;
-    const position = localPoint.clone().normalize().multiplyScalar(earthRadius + 0.08);
+    const earthRadius = (this.earthMesh.geometry && this.earthMesh.geometry.parameters && this.earthMesh.geometry.parameters.radius) || 2.2;
+    const position = localPoint.clone().normalize().multiplyScalar(earthRadius + 0.035);
     this.markerGroup.position.copy(position);
 
-    // 1. Glowing Pin Head (Small Sphere)
-    const headGeo = new THREE.SphereGeometry(0.12, 16, 16);
+    // 1. Glowing Pin Head (Compact Sphere)
+    const headGeo = new THREE.SphereGeometry(0.045, 16, 16);
     const headMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
     const headMesh = new THREE.Mesh(headGeo, headMat);
     this.markerGroup.add(headMesh);
 
-    // 2. Translucent Halo
-    const haloGeo = new THREE.SphereGeometry(0.28, 16, 16);
+    // 2. Translucent Halo (Compact Glowing Aura)
+    const haloGeo = new THREE.SphereGeometry(0.09, 16, 16);
     const haloMat = new THREE.MeshBasicMaterial({
       color: 0x0284c7,
       transparent: true,
@@ -374,8 +374,8 @@ export class EarthFMManager {
     const haloMesh = new THREE.Mesh(haloGeo, haloMat);
     this.markerGroup.add(haloMesh);
 
-    // 3. Target Ring
-    const ringGeo = new THREE.RingGeometry(0.18, 0.28, 24);
+    // 3. Target Ring (Compact Sleek Ring)
+    const ringGeo = new THREE.RingGeometry(0.06, 0.10, 24);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       side: THREE.DoubleSide,

@@ -273,9 +273,9 @@ export function getLiveOrbitAngle(config, date = new Date()) {
 }
 
 /**
- * Calculates real-time axial rotation angle for Earth & planets based on live UTC system clock
+ * Calculates real-time axial rotation angle for Earth & planets based on live UTC system clock & solar position
  */
-export function getLiveRotationAngle(config, date = new Date()) {
+export function getLiveRotationAngle(config, date = new Date(), orbitAngle = 0) {
   let rotationHours = 24.0;
   if (config.id === 'earth') rotationHours = 24.0;
   else if (config.id === 'mars') rotationHours = 24.62;
@@ -288,8 +288,15 @@ export function getLiveRotationAngle(config, date = new Date()) {
 
   const secondsInDay = (date.getUTCHours() * 3600) + (date.getUTCMinutes() * 60) + date.getUTCSeconds() + (date.getUTCMilliseconds() / 1000);
   const dayFraction = (secondsInDay / (rotationHours * 3600)) % 1;
+
+  if (config.id === 'earth') {
+    // Synchronize Greenwich Meridian (Lon 0) with UTC solar noon (12:00:00 UTC)
+    const solarOffset = orbitAngle + Math.PI;
+    const utcSpinAngle = (dayFraction - 0.5) * Math.PI * 2;
+    return solarOffset + utcSpinAngle;
+  }
+
   const isRetrograde = (config.rotationSpeed && config.rotationSpeed < 0) || config.id === 'venus' || config.id === 'uranus';
-  
   const angle = dayFraction * Math.PI * 2;
   return isRetrograde ? -angle : angle;
 }

@@ -268,9 +268,9 @@ export class PlanetFactory {
         p.orbitAngle += (p.config.orbitSpeed || 1.0) * 0.0025 * timeFactor;
         p.planetMesh.rotation.y += (p.config.rotationSpeed || 0.01) * 1.5 * timeFactor;
       } else if (timeSpeed === 1.0) {
-        // 1:1 Astronomical Real-Time Clock Mode
+        // 1:1 Astronomical Real-Time Clock Mode (Synced with UTC Day & Night)
         p.orbitAngle = getLiveOrbitAngle(p.config, now);
-        p.planetMesh.rotation.y = getLiveRotationAngle(p.config, now);
+        p.planetMesh.rotation.y = getLiveRotationAngle(p.config, now, p.orbitAngle);
       } else {
         // Accelerated simulation time mode
         p.orbitAngle += p.config.orbitSpeed * 0.002 * timeFactor;
