@@ -91,7 +91,7 @@ Then open **`http://localhost:8080`** in your browser!
 | **Zoom In / Out** | Mouse Scroll Wheel |
 | **Camera Translation** | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> |
 | **Camera Elevation** | <kbd>Space</kbd> / <kbd>Shift</kbd> |
-| **Reset View** | <kbd>R</kbd> or **🌌 Reset View** button |
+| **Reset View** | <kbd>R</kbd> / <kbd>ESC</kbd> or **🌌 Reset View** button |
 | **Toggle Controls Panel** | Click **☰ CONTROLS** in header |
 | **Select Celestial Body** | Click any Planet, Moon, or Satellite |
 

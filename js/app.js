@@ -8,7 +8,7 @@ import { InteractionManager } from './components/interactionManager.js';
 import { CameraAnimator } from './components/cameraAnimator.js';
 import { UIOverlay } from './ui/overlay.js';
 import { LoadingScreen } from './ui/loadingScreen.js';
-import { HeroIntro } from './ui/heroIntro.js';
+import { LandingPage } from './ui/landingPage.js';
 import { TopNav } from './ui/topNav.js';
 import { SimControls } from './ui/simControls.js';
 import { HelpModal } from './ui/helpModal.js';
@@ -123,12 +123,21 @@ class Application {
       () => { this.helpModal.toggle(); }
     );
 
-    this.heroIntro = new HeroIntro(() => {
-      // Intro completed / skipped
+    this.landingPage = new LandingPage(() => {
+      // Rocket liftoff complete: animate camera overview into Solar System
+      this.cameraAnimator.resetToOverview();
     });
 
+    // Wire EXPLORE button in header to re-open landing page
+    const exploreBtn = document.getElementById('nav-btn-explore');
+    if (exploreBtn) {
+      exploreBtn.addEventListener('click', () => {
+        this.landingPage.show();
+      });
+    }
+
     this.loadingScreen = new LoadingScreen(() => {
-      // Enter Solar System directly without popups
+      // 3D engine initialized
     });
 
     // 7. Connect Callbacks & Hierarchical Navigation
@@ -219,10 +228,14 @@ class Application {
     this.infoPanel.onFocusCallback = handleFocus;
     this.uiOverlay.onFocusCallback = handleFocus;
 
-    // Reset View Button Clicked (UI Button or R key)
+    // Reset View Function (Triggered by Reset View UI Button, R key, or Escape key)
     const handleReset = () => {
+      if (this.earthFMManager && this.earthFMManager.earthFMMode) {
+        this.earthFMManager.exitEarthFM();
+      }
       this.interactionManager.deselect();
       this.infoPanel.hide();
+      this.helpModal.hide();
       this.topNav.updateBreadcrumb(null);
       this.planetFactory.setActiveFocusParent(null);
       this.cameraAnimator.resetToOverview();
@@ -230,14 +243,9 @@ class Application {
     this.infoPanel.onResetCallback = handleReset;
     this.uiOverlay.onResetCallback = handleReset;
 
-    // Global Keyboard Shortcuts (R key reset, ESC key close)
+    // Global Keyboard Shortcuts (R key & ESC key trigger Reset View)
     this.controlsManager.onResetShortcut = handleReset;
-    this.controlsManager.onEscapeShortcut = () => {
-      this.interactionManager.deselect();
-      this.infoPanel.hide();
-      this.helpModal.hide();
-      this.planetFactory.setActiveFocusParent(null);
-    };
+    this.controlsManager.onEscapeShortcut = handleReset;
     this.controlsManager.onSpaceShortcut = () => {
       if (this.timeMultiplier > 0) {
         this.simControls.setSpeed(0);

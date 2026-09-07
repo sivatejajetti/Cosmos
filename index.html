@@ -37,17 +37,202 @@
     </div>
   </div>
 
-  <!-- 3. Cinematic Hero Introduction Overlay -->
-  <div id="hero-intro" class="hero-intro">
-    <div class="hero-card">
-      <div class="hero-badge">NASA & ISRO SCIENTIFIC INTERFACE</div>
-      <h1 class="hero-title">COSMOS</h1>
-      <p class="hero-headline">EXPLORE THE SOLAR SYSTEM & HISTORIC SPACECRAFT</p>
-      <p class="hero-description">An interactive cinematic journey through planets, natural moons, and human spaceflight history from Sputnik and Aryabhata to James Webb and Aditya-L1.</p>
+  <!-- 3. Fabulous Cinematic Landing Page & Rocket Launch Stage -->
+  <div id="landing-page" class="landing-page">
+    <!-- Particle FX Canvas for Thruster Flame & Smoke Plumes -->
+    <canvas id="launch-fx-canvas" class="launch-fx-canvas"></canvas>
 
-      <div class="hero-actions">
-        <button id="hero-start-btn" class="btn-hero-primary">🚀 START EXPLORING</button>
-        <button id="hero-skip-btn" class="btn-hero-link">Skip Intro &rarr;</button>
+    <!-- Starry & Nebula Backdrop Glow Layer -->
+    <div class="landing-nebula-backdrop"></div>
+    <div class="landing-stars-twinkle"></div>
+
+    <!-- Warp Speed Lines during Rocket Ascent -->
+    <div id="launch-warp-speed" class="launch-warp-speed">
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+      <div class="warp-line"></div>
+    </div>
+
+    <!-- Telemetry & Mission Header -->
+    <div class="landing-top-hud">
+      <div class="telemetry-item">
+        <span class="hud-dot"></span>
+        <span class="hud-label">MISSION STATUS:</span>
+        <span class="hud-val">T-MINUS READY</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="hud-label">VESSEL:</span>
+        <span class="hud-val">COSMOS EXPLORER-1</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="hud-label">DESTINATION:</span>
+        <span class="hud-val">SOLAR SYSTEM & DEEP SPACE</span>
+      </div>
+    </div>
+
+    <!-- Central Landing Hero HUD Card -->
+    <div id="landing-hud-content" class="landing-hud-content">
+      <div class="landing-badge">
+        <span class="badge-sparkle">✦</span>
+        <span>ASTRONOMICAL EXPLORATION PLATFORM</span>
+        <span class="badge-sparkle">✦</span>
+      </div>
+
+      <h1 class="landing-title">COSMOS</h1>
+      <p class="landing-headline">VOYAGE BEYOND THE HORIZON</p>
+      <p class="landing-description">
+        Embark on an interactive 3D odyssey through planetary atmospheres, 17 natural moons, and human spaceflight history with real-time astronomical physics, satellite fleets, and global radio.
+      </p>
+
+      <!-- Feature Pill Highlights -->
+      <div class="landing-features-grid">
+        <div class="feat-pill">
+          <span class="feat-icon">🪐</span>
+          <div class="feat-text">
+            <strong>8 Planets & Moons</strong>
+            <span>Photorealistic orbits & rings</span>
+          </div>
+        </div>
+        <div class="feat-pill">
+          <span class="feat-icon">🛰️</span>
+          <div class="feat-text">
+            <strong>50+ Spacecraft</strong>
+            <span>ISRO, NASA, Telescopes & Fleets</span>
+          </div>
+        </div>
+        <div class="feat-pill">
+          <span class="feat-icon">📻</span>
+          <div class="feat-text">
+            <strong>Earth FM Radio</strong>
+            <span>Live audio across the globe</span>
+          </div>
+        </div>
+        <div class="feat-pill">
+          <span class="feat-icon">☀️</span>
+          <div class="feat-text">
+            <strong>Real-Time Solar Sync</strong>
+            <span>Live day/night terminator</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button Area -->
+      <div class="landing-actions">
+        <button id="landing-launch-btn" class="btn-landing-launch">
+          <span class="btn-launch-glow"></span>
+          <span class="btn-launch-icon">🚀</span>
+          <div class="btn-launch-text-col">
+            <span class="btn-launch-main">LAUNCH MISSION</span>
+            <span class="btn-launch-sub">IGNITE BOOSTERS & ENTER COSMOS</span>
+          </div>
+        </button>
+
+        <button id="landing-skip-btn" class="btn-landing-bypass">
+          <span>Direct Explore</span>
+          <span class="arrow">&rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Countdown HUD during launch -->
+    <div id="launch-countdown" class="launch-countdown">
+      <span class="cd-num">T-3</span>
+      <span class="cd-label">MAIN ENGINE IGNITION</span>
+    </div>
+
+    <!-- Realistic Detailed SVG Heavy Lifter Rocket Stage -->
+    <div id="launch-rocket-stage" class="launch-rocket-stage">
+      <div id="launch-rocket" class="launch-rocket">
+        <svg class="rocket-svg" viewBox="0 0 160 320" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fuselageGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#cbd5e1" />
+              <stop offset="35%" stop-color="#ffffff" />
+              <stop offset="70%" stop-color="#f1f5f9" />
+              <stop offset="100%" stop-color="#94a3b8" />
+            </linearGradient>
+            <linearGradient id="boosterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#c2410c" />
+              <stop offset="40%" stop-color="#ea580c" />
+              <stop offset="80%" stop-color="#f97316" />
+              <stop offset="100%" stop-color="#9a3412" />
+            </linearGradient>
+            <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#0284c7" />
+            </linearGradient>
+            <linearGradient id="nozzleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#334155" />
+              <stop offset="50%" stop-color="#64748b" />
+              <stop offset="100%" stop-color="#1e293b" />
+            </linearGradient>
+            <filter id="thrusterGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Left Booster -->
+          <path d="M 32 100 Q 32 65 44 55 L 44 240 L 26 240 L 26 100 Z" fill="url(#boosterGrad)" stroke="#7c2d12" stroke-width="1.5" />
+          <path d="M 26 240 L 44 240 L 40 260 L 30 260 Z" fill="url(#nozzleGrad)" />
+          <!-- Left Booster Fin -->
+          <polygon points="26,200 12,245 26,240" fill="#64748b" stroke="#334155" />
+
+          <!-- Right Booster -->
+          <path d="M 128 100 Q 128 65 116 55 L 116 240 L 134 240 L 134 100 Z" fill="url(#boosterGrad)" stroke="#7c2d12" stroke-width="1.5" />
+          <path d="M 116 240 L 134 240 L 130 260 L 120 260 Z" fill="url(#nozzleGrad)" />
+          <!-- Right Booster Fin -->
+          <polygon points="134,200 148,245 134,240" fill="#64748b" stroke="#334155" />
+
+          <!-- Center Main Core Fuselage -->
+          <path d="M 54 75 Q 80 15 106 75 L 106 250 L 54 250 Z" fill="url(#fuselageGrad)" stroke="#64748b" stroke-width="1.5" />
+
+          <!-- Command Module Visor -->
+          <ellipse cx="80" cy="72" rx="14" ry="7" fill="url(#visorGrad)" stroke="#0284c7" stroke-width="1.5" />
+
+          <!-- Black Thermal Tile Bands & Decals -->
+          <rect x="54" y="95" width="52" height="6" fill="#0f172a" />
+          <rect x="54" y="160" width="52" height="4" fill="#0f172a" />
+          <rect x="54" y="215" width="52" height="8" fill="#0f172a" />
+
+          <!-- Mission Markings -->
+          <text x="80" y="132" font-family="'Space Grotesk', sans-serif" font-size="7" font-weight="900" fill="#0284c7" text-anchor="middle" letter-spacing="1">COSMOS-1</text>
+          <text x="80" y="144" font-family="'Space Grotesk', sans-serif" font-size="5.5" font-weight="700" fill="#64748b" text-anchor="middle" letter-spacing="0.5">ISRO • NASA</text>
+
+          <!-- Interstage Grid Seams -->
+          <line x1="54" y1="180" x2="106" y2="180" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="1" />
+          <line x1="54" y1="184" x2="106" y2="184" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="1" />
+
+          <!-- Center Engine Bell Nozzles -->
+          <path d="M 62 250 L 74 250 L 71 272 L 65 272 Z" fill="url(#nozzleGrad)" />
+          <path d="M 74 250 L 86 250 L 83 275 L 77 275 Z" fill="url(#nozzleGrad)" />
+          <path d="M 86 250 L 98 250 L 95 272 L 89 272 Z" fill="url(#nozzleGrad)" />
+
+          <!-- Pre-ignition Engine Plasma Chamber Glow -->
+          <ellipse cx="80" cy="275" rx="8" ry="3" fill="#38bdf8" filter="url(#thrusterGlow)" opacity="0.9" />
+          <ellipse cx="68" cy="272" rx="5" ry="2.5" fill="#f59e0b" filter="url(#thrusterGlow)" opacity="0.8" />
+          <ellipse cx="92" cy="272" rx="5" ry="2.5" fill="#f59e0b" filter="url(#thrusterGlow)" opacity="0.8" />
+
+          <!-- Strobe Beacon Nav Lights -->
+          <circle cx="80" cy="22" r="2.5" fill="#ef4444" class="strobe-beacon" />
+          <circle cx="44" cy="58" r="2" fill="#22c55e" class="strobe-beacon" />
+          <circle cx="116" cy="58" r="2" fill="#38bdf8" class="strobe-beacon" />
+        </svg>
+
+        <!-- Static Engine Exhaust Core attached to rocket base -->
+        <div class="rocket-engine-fire">
+          <div class="flame-core"></div>
+          <div class="flame-outer"></div>
+          <div class="flame-shock-diamonds"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -100,7 +285,7 @@
   <div class="app-controls-hint">
     <div class="control-badge"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</div>
     <div class="control-badge"><kbd>Space</kbd>/<kbd>Shift</kbd> Elevate</div>
-    <div class="control-badge"><kbd>R</kbd> Reset</div>
+    <div class="control-badge"><kbd>R</kbd>/<kbd>ESC</kbd> Reset View</div>
     <div class="control-badge"><span class="mouse-icon">🖱️</span> Drag to Orbit / Click Object</div>
   </div>
 
@@ -223,8 +408,8 @@
             <ul>
               <li><b>W / A / S / D:</b> Translate camera position</li>
               <li><b>Space / Shift:</b> Elevate / lower camera altitude</li>
-              <li><b>R:</b> Reset camera to Solar System overview</li>
-              <li><b>ESC:</b> Close active panel or modal</li>
+              <li><b>R / ESC:</b> Reset camera & view to Solar System overview</li>
+              <li><b>Space:</b> Pause / Resume simulation speed</li>
             </ul>
           </div>
         </div>
