@@ -128,10 +128,10 @@ export class ArtificialSatelliteFactory {
     });
 
     const sprite = new THREE.Sprite(spriteMat);
-    const spriteScaleY = 1.3;
+    const spriteScaleY = 0.38;
     const spriteScaleX = spriteScaleY * (384 / 96);
     sprite.scale.set(spriteScaleX, spriteScaleY, 1);
-    sprite.position.set(0, 1.2, 0);
+    sprite.position.set(0, 0.38, 0);
 
     return sprite;
   }
