@@ -223,7 +223,7 @@ export class LandingPage {
       if (rocket) {
         const rect = rocket.getBoundingClientRect();
         nozzleX = rect.left + rect.width / 2;
-        nozzleY = rect.bottom - 10;
+        nozzleY = rect.top + rect.height * (270 / 320);
       }
 
       // Generate Plume Flame Particles

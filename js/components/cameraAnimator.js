@@ -37,18 +37,28 @@ export class CameraAnimator {
   }
 
   /**
-   * Focus camera smoothly on a celestial object mesh
+   * Focus camera smoothly on a celestial object mesh (planet, moon, or spacecraft)
    */
   focusOnObject(mesh, radiusOrConfig) {
     this.targetMesh = mesh;
     this.isEarthFMZoom = false;
+
+    let radius = 1.5;
+    let type = 'planet';
+    let category = null;
+
     if (typeof radiusOrConfig === 'number') {
-      this.targetRadius = radiusOrConfig;
-    } else if (radiusOrConfig && typeof radiusOrConfig.radius === 'number') {
-      this.targetRadius = radiusOrConfig.radius;
-    } else {
-      this.targetRadius = 2.2;
+      radius = radiusOrConfig;
+    } else if (radiusOrConfig && typeof radiusOrConfig === 'object') {
+      radius = radiusOrConfig.radius || (mesh.userData && mesh.userData.radius) || 1.5;
+      type = radiusOrConfig.type || (mesh.userData && mesh.userData.type) || 'planet';
+      category = radiusOrConfig.category || (mesh.userData && mesh.userData.category) || null;
     }
+
+    this.targetRadius = radius;
+    this.targetType = type;
+    this.targetCategory = category;
+
     this.isFocusing = true;
     this.isResetting = false;
   }
@@ -59,6 +69,8 @@ export class CameraAnimator {
   focusEarthFM(mesh) {
     this.targetMesh = mesh;
     this.targetRadius = 2.2;
+    this.targetType = 'planet';
+    this.targetCategory = null;
     this.isEarthFMZoom = true;
     this.isFocusing = true;
     this.isResetting = false;
@@ -90,9 +102,20 @@ export class CameraAnimator {
 
       this.goalTargetPos.copy(worldPos);
 
-      // Optimal viewing offset based on radius
-      // In Earth FM mode, zoom close so Earth fills the viewport (offsetDist = 5.2)
-      const offsetDist = this.isEarthFMZoom ? 5.2 : Math.max(22, this.targetRadius * 3.4 + 10);
+      // Optimal viewing offset based on object type & radius
+      let offsetDist;
+      if (this.isEarthFMZoom) {
+        offsetDist = 5.2;
+      } else if (this.targetCategory === 'artificial' || this.targetType === 'spacecraft' || this.targetRadius < 0.3) {
+        // Spacecraft / Artificial Satellites: Close-up zoom (1.8 to 3.0 units)
+        offsetDist = Math.max(1.8, this.targetRadius * 6.0 + 1.5);
+      } else if (this.targetType === 'satellite' || this.targetRadius < 1.0) {
+        // Natural Satellites / Moons: Close-up zoom (3.5 to 6.0 units)
+        offsetDist = Math.max(3.5, this.targetRadius * 4.0 + 2.2);
+      } else {
+        // Planets & Sun: Overview framing (18 to 35 units)
+        offsetDist = Math.max(18, this.targetRadius * 3.4 + 10);
+      }
       
       const currentDir = new THREE.Vector3().subVectors(this.camera.position, this.controls.target);
       if (currentDir.lengthSq() < 0.1) currentDir.set(0, 1, 2);

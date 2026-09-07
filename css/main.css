@@ -658,14 +658,14 @@ button, a, input, select, label, .tab-btn, .speed-btn, .drawer-item, .bc-link, .
   100% { opacity: 1; filter: drop-shadow(0 0 6px currentColor); }
 }
 
-/* Engine Exhaust Fire Plume (Base Layer attached to Rocket) */
+/* Engine Exhaust Fire Plume (Base Layer attached to Rocket Nozzles) */
 .rocket-engine-fire {
   position: absolute;
-  bottom: 12px;
+  top: 268px;
   left: 50%;
   transform: translateX(-50%);
-  width: 48px;
-  height: 120px;
+  width: 54px;
+  height: 140px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -680,23 +680,23 @@ button, a, input, select, label, .tab-btn, .speed-btn, .drawer-item, .bc-link, .
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 22px;
-  height: 90px;
+  width: 24px;
+  height: 100px;
   background: linear-gradient(180deg, #ffffff 0%, #38bdf8 30%, #f59e0b 70%, transparent 100%);
-  border-radius: 50% 50% 20% 20%;
+  border-radius: 20% 20% 50% 50%;
   filter: blur(2px) drop-shadow(0 0 15px #38bdf8);
   animation: flameFlicker 0.08s infinite alternate;
 }
 
 .flame-outer {
   position: absolute;
-  top: -5px;
+  top: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 44px;
-  height: 130px;
+  width: 48px;
+  height: 135px;
   background: linear-gradient(180deg, rgba(249, 115, 22, 0.95) 0%, rgba(234, 88, 12, 0.8) 40%, rgba(239, 68, 68, 0.4) 75%, transparent 100%);
-  border-radius: 50% 50% 30% 30%;
+  border-radius: 20% 20% 50% 50%;
   filter: blur(6px) drop-shadow(0 0 20px #f97316);
   animation: flameFlicker 0.06s infinite alternate-reverse;
 }

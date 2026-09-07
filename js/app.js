@@ -189,8 +189,7 @@ class Application {
       // Activate satellite orbits and satellite labels for this parent body
       this.planetFactory.setActiveFocusParent(parentId);
 
-      const radius = mesh.userData.radius || data.radius || 1.5;
-      this.cameraAnimator.focusOnObject(mesh, radius);
+      this.cameraAnimator.focusOnObject(mesh, data);
     };
 
     // On Object Deselected / Clicked Empty Space
@@ -221,8 +220,8 @@ class Application {
     const handleFocus = () => {
       if (this.interactionManager.selectedMesh) {
         const mesh = this.interactionManager.selectedMesh;
-        const radius = mesh.userData.radius || 1.5;
-        this.cameraAnimator.focusOnObject(mesh, radius);
+        const data = this.interactionManager.selectedData || mesh.userData;
+        this.cameraAnimator.focusOnObject(mesh, data);
       }
     };
     this.infoPanel.onFocusCallback = handleFocus;
