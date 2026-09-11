@@ -28,13 +28,6 @@ export class TopNav {
       const pioneers = ARTIFICIAL_SATELLITES_DATA.filter(s => s.layer === 'pioneers' && !s.countryAgency.includes('ISRO'));
 
       this.objectsMenu.innerHTML = `
-        <div class="drawer-section-title">📍 LIVE OBSERVER LOCATION</div>
-        <button class="drawer-item" data-id="user-location" style="border-left: 3px solid #22c55e; background: rgba(34, 197, 94, 0.1);">
-          <span class="drawer-item-dot" style="background-color: #22c55e; box-shadow: 0 0 10px #22c55e;"></span>
-          <span class="drawer-item-name" style="color: #4ade80; font-weight: 600;">My Live Location</span>
-          <span class="drawer-item-type">GPS PIN</span>
-        </button>
-
         <div class="drawer-section-title">PLANETS & STARS</div>
         ${planets.map(obj => `
           <button class="drawer-item" data-id="${obj.id}">
@@ -157,25 +150,7 @@ export class TopNav {
       return;
     }
 
-    if (data.type === 'user_location') {
-      this.breadcrumbContainer.innerHTML = `
-        <span class="bc-item bc-link" id="bc-solar">SOLAR SYSTEM</span>
-        <span class="bc-sep">/</span>
-        <span class="bc-item bc-link" id="bc-parent">EARTH</span>
-        <span class="bc-sep">/</span>
-        <span class="bc-item active" style="color: #4ade80;">📍 MY LIVE LOCATION</span>
-      `;
-
-      const bcSolar = document.getElementById('bc-solar');
-      if (bcSolar) bcSolar.addEventListener('click', () => {
-        if (this.onSelectObject) this.onSelectObject(null);
-      });
-
-      const bcParent = document.getElementById('bc-parent');
-      if (bcParent) bcParent.addEventListener('click', () => {
-        if (this.onSelectObject) this.onSelectObject('earth');
-      });
-    } else if (data.category === 'artificial' || data.type === 'satellite' || data.type === 'Natural Satellite' || data.type === 'Galilean Satellite') {
+    if (data.category === 'artificial' || data.type === 'satellite' || data.type === 'Natural Satellite' || data.type === 'Galilean Satellite') {
       const parentId = data.parentBodyId || data.parentPlanetId || 'earth';
       const parentName = parentId.toUpperCase();
 

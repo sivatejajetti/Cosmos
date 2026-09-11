@@ -20,7 +20,6 @@ export class InteractionManager {
 
     this.onSelectCallback = null;
     this.onDeselectCallback = null;
-    this.onDoubleClickCallback = null;
     this.earthFMManager = null;
 
     this.init();
@@ -39,7 +38,6 @@ export class InteractionManager {
   init() {
     this.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
     this.domElement.addEventListener('click', (e) => this.onClick(e));
-    this.domElement.addEventListener('dblclick', (e) => this.onDoubleClick(e));
   }
 
   findRegisteredTarget(intersectedObject) {
@@ -103,46 +101,6 @@ export class InteractionManager {
     } else {
       if (!this.earthFMManager || !this.earthFMManager.earthFMMode) {
         this.deselect();
-      }
-    }
-  }
-
-  onDoubleClick(event) {
-    const rect = this.domElement.getBoundingClientRect();
-    this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-
-    // 1. Check if user double-clicked registered targets (like live location or satellites)
-    const meshes = this.interactiveTargets.map(t => t.mesh);
-    const intersects = this.raycaster.intersectObjects(meshes, true);
-
-    if (intersects.length > 0) {
-      const targetObj = this.findRegisteredTarget(intersects[0].object);
-      if (targetObj) {
-        if (this.onDoubleClickCallback) {
-          this.onDoubleClickCallback(targetObj.data, targetObj.mesh, intersects[0].point);
-        }
-        return;
-      }
-    }
-
-    // 2. Check if user double-clicked directly on Earth's 3D globe surface
-    if (this.earthFMManager && this.earthFMManager.earthMesh) {
-      const earthIntersects = this.raycaster.intersectObject(this.earthFMManager.earthMesh, true);
-      if (earthIntersects.length > 0) {
-        const point = earthIntersects[0].point;
-        const latLon = this.earthFMManager.convertPointToLatLon(this.earthFMManager.earthMesh, point);
-        if (this.onDoubleClickCallback) {
-          this.onDoubleClickCallback({
-            type: 'earth_surface',
-            id: 'earth-surface',
-            name: 'Earth Surface',
-            lat: latLon.latitude,
-            lon: latLon.longitude
-          }, this.earthFMManager.earthMesh, point);
-        }
       }
     }
   }
