@@ -1,6 +1,7 @@
 import { PLANETS_DATA } from '../config/planetsData.js';
 import { SATELLITES_DATA } from '../config/satellitesData.js';
 import { CosmosApi } from '../services/cosmosApi.js';
+import { DistanceService } from '../services/distanceService.js';
 
 /**
  * Modular Tabbed Information Panel — Segment 7 AI Explanation Integration
@@ -12,6 +13,7 @@ export class InfoPanel {
     this.wikiData = null;
     this.wikiLoading = false;
     this.activeTab = 'overview';
+    this.distanceTimer = null;
 
     // AI State
     this.aiExplanation = null;
@@ -26,6 +28,7 @@ export class InfoPanel {
     this.onResetCallback = null;
     this.onSelectMoonCallback = null;
     this.onSelectParentPlanetCallback = null;
+    this.onOpenSatelliteMapCallback = null;
 
     this.init();
   }
@@ -55,8 +58,43 @@ export class InfoPanel {
     this.container.classList.remove('hidden');
     this.container.classList.add('visible');
 
+    this.startDistanceTimer();
+
     // Asynchronously fetch Wikipedia summary in background
     this.fetchWikipedia(data.id);
+  }
+
+  startDistanceTimer() {
+    this.stopDistanceTimer();
+    this.distanceTimer = setInterval(() => {
+      this.updateDistanceElements();
+    }, 1000);
+  }
+
+  stopDistanceTimer() {
+    if (this.distanceTimer) {
+      clearInterval(this.distanceTimer);
+      this.distanceTimer = null;
+    }
+  }
+
+  updateDistanceElements() {
+    if (!this.currentData || this.activeTab !== 'overview') return;
+
+    const liveDist = DistanceService.getLiveDistance(this.currentData);
+    if (!liveDist) return;
+
+    const kmEl = document.getElementById('live-dist-km');
+    const auEl = document.getElementById('live-dist-au');
+    const miEl = document.getElementById('live-dist-mi');
+    const lightEl = document.getElementById('live-dist-light');
+    const locEl = document.getElementById('live-dist-loc');
+
+    if (kmEl) kmEl.textContent = liveDist.km;
+    if (auEl) auEl.textContent = liveDist.au;
+    if (miEl) miEl.textContent = liveDist.miles;
+    if (lightEl) lightEl.textContent = liveDist.lightTime;
+    if (locEl) locEl.textContent = liveDist.locationStatus;
   }
 
   async fetchWikipedia(id) {
@@ -92,6 +130,7 @@ export class InfoPanel {
   }
 
   hide() {
+    this.stopDistanceTimer();
     this.container.classList.remove('visible');
     this.container.classList.add('hidden');
   }
@@ -110,7 +149,7 @@ export class InfoPanel {
         <div class="panel-title-group">
           <h2 class="panel-planet-title">${data.name}</h2>
           <span class="panel-planet-subtitle">
-            ${isArtificial ? `ARTIFICIAL SPACECRAFT \u2022 ${data.launchYear} \u2022 ${data.countryAgency}` : (isMoon ? `NATURAL SATELLITE OF ${parentPlanet.name.toUpperCase()}` : (data.positionFromSun || data.type || ''))}
+            ${data.type === 'user_location' ? 'EARTH • LIVE GPS OBSERVATION VANTAGE' : (isArtificial ? `ARTIFICIAL SPACECRAFT • ${data.launchYear} • ${data.countryAgency}` : (isMoon ? `NATURAL SATELLITE OF ${parentPlanet.name.toUpperCase()}` : (data.positionFromSun || data.type || '')))}
           </span>
         </div>
         <button class="panel-close-btn" id="panel-close-btn" title="Close Panel">&times;</button>
@@ -131,9 +170,12 @@ export class InfoPanel {
       </div>
 
       <div class="panel-actions-footer">
-        ${data.id === 'earth' ? `
+        ${data.id === 'earth' || data.type === 'user_location' ? `
+          <button class="btn-action btn-sat-map" id="panel-btn-sat-map" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8;">
+            🛰️ SATELLITE MAP (HOUSE LEVEL)
+          </button>
           <button class="btn-action btn-earth-fm" id="panel-btn-earth-fm">
-            🌍 EXPLORE EARTH FM
+            🌍 ${data.type === 'user_location' ? 'TUNE LOCAL RADIO (EARTH FM)' : 'EXPLORE EARTH FM'}
           </button>
         ` : ''}
         ${parentId ? `
@@ -161,6 +203,15 @@ export class InfoPanel {
       this.hide();
       if (this.onCloseCallback) this.onCloseCallback();
     });
+
+    // Satellite Map Button
+    const satMapBtn = document.getElementById('panel-btn-sat-map');
+    if (satMapBtn) {
+      satMapBtn.addEventListener('click', () => {
+        this.hide();
+        if (this.onOpenSatelliteMapCallback) this.onOpenSatelliteMapCallback(data);
+      });
+    }
 
     // Earth FM Button
     const earthFMBtn = document.getElementById('panel-btn-earth-fm');
@@ -260,8 +311,94 @@ export class InfoPanel {
 
   renderTabContent(data, isArtificial, isMoon, parentPlanet) {
     if (this.activeTab === 'overview') {
+      if (data.type === 'user_location') {
+        const moonDist = DistanceService.getLiveDistance({ id: 'moon', type: 'satellite', parentPlanetId: 'earth' });
+        const marsDist = DistanceService.getLiveDistance({ id: 'mars' });
+        const sunDist = DistanceService.getLiveDistance({ id: 'sun' });
+
+        const lat = data.lat || DistanceService.userLocation.lat;
+        const lon = data.lon || DistanceService.userLocation.lon;
+        const latStr = `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}`;
+        const lonStr = `${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? 'E' : 'W'}`;
+        const spinSpeed = Math.round(1674.4 * Math.cos((lat * Math.PI) / 180));
+
+        return `
+          <p class="panel-description">
+            This is your live physical observation vantage point on planet Earth. From this coordinate, you are traversing space at 107,000 km/h in Earth's orbit around the Sun.
+          </p>
+
+          <div class="panel-section-title">GEOGRAPHIC COORDINATES</div>
+          <div class="panel-stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Latitude</span>
+              <span class="stat-value" style="color: #38bdf8;">${latStr}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Longitude</span>
+              <span class="stat-value" style="color: #38bdf8;">${lonStr}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Surface Spin Speed</span>
+              <span class="stat-value" style="color: #22c55e;">${spinSpeed} km/h</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Fix Accuracy</span>
+              <span class="stat-value" style="color: #fbbf24;">${DistanceService.userLocation.isGPS ? 'GPS Verified' : 'Local Estimated'}</span>
+            </div>
+          </div>
+
+          <div class="panel-section-title" style="margin-top: 14px;">LIVE ASTRONOMICAL DISTANCES</div>
+          <div class="panel-stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Distance to Moon</span>
+              <span class="stat-value">${moonDist ? moonDist.km : '384,400 km'}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Distance to Sun</span>
+              <span class="stat-value">${sunDist ? sunDist.km : '149.6M km'}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Distance to Mars</span>
+              <span class="stat-value">${marsDist ? marsDist.km : '225M km'}</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Lunar Radio Delay</span>
+              <span class="stat-value" style="color: #fbbf24;">${moonDist ? moonDist.lightTime : '1.28s'}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      const liveDist = DistanceService.getLiveDistance(data);
+
       return `
         <p class="panel-description">${data.description || 'No overview available.'}</p>
+
+        <div class="live-distance-card">
+          <div class="ld-header-bar">
+            <span class="ld-header-title">📍 DISTANCE FROM YOUR LOCATION</span>
+            <span class="live-pulse-dot" title="Live Telemetry Active"></span>
+          </div>
+          <div class="ld-main-val" id="live-dist-km">${liveDist ? liveDist.km : 'Calculating...'}</div>
+          <div class="ld-sub-grid">
+            <div class="ld-sub-item">
+              <span class="ld-label">AU Scale</span>
+              <span class="ld-val" id="live-dist-au">${liveDist ? liveDist.au : '--'}</span>
+            </div>
+            <div class="ld-sub-item">
+              <span class="ld-label">Miles</span>
+              <span class="ld-val" id="live-dist-mi">${liveDist ? liveDist.miles : '--'}</span>
+            </div>
+            <div class="ld-sub-item">
+              <span class="ld-label">Light Delay</span>
+              <span class="ld-val highlight" id="live-dist-light">${liveDist ? liveDist.lightTime : '--'}</span>
+            </div>
+          </div>
+          <div class="ld-footer">
+            <span class="ld-loc-icon">🌐</span>
+            <span id="live-dist-loc">${liveDist ? liveDist.locationStatus : 'Location Active'}</span>
+          </div>
+        </div>
 
         <div class="panel-section-title">QUICK FACTS</div>
         <div class="panel-stats-grid">

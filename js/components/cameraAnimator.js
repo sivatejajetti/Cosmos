@@ -106,6 +106,9 @@ export class CameraAnimator {
       let offsetDist;
       if (this.isEarthFMZoom) {
         offsetDist = 5.2;
+      } else if (this.targetType === 'user_location') {
+        // User Live Location on Earth: close-up surface zoom (1.5 units offset)
+        offsetDist = 1.5;
       } else if (this.targetCategory === 'artificial' || this.targetType === 'spacecraft' || this.targetRadius < 0.3) {
         // Spacecraft / Artificial Satellites: Close-up zoom (1.8 to 3.0 units)
         offsetDist = Math.max(1.8, this.targetRadius * 6.0 + 1.5);

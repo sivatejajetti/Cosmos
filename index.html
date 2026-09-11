@@ -7,6 +7,8 @@
   <title>COSMOS — Interactive Solar System & Spacecraft</title>
   
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script type="importmap">
     {
@@ -20,6 +22,53 @@
 <body>
   <!-- 1. 3D WebGL Canvas Container -->
   <div id="canvas-container"></div>
+
+  <!-- Real High-Resolution Satellite Map Overlay (Houses, Streets & Rooftops) -->
+  <div id="satellite-map-overlay" class="satellite-map-overlay hidden">
+    <div id="satellite-map" class="satellite-map"></div>
+
+    <!-- HUD Telemetry & Return Bar -->
+    <div class="satellite-hud-top">
+      <div class="sat-hud-left">
+        <div class="sat-status-badge">
+          <span class="sat-pulse-dot"></span>
+          <span class="sat-badge-text">LIVE SATELLITE RECONNAISSANCE</span>
+        </div>
+        <div class="sat-telemetry-pill">
+          <span id="sat-telemetry-coords">LAT: -- • LON: --</span>
+          <span class="sat-sep">•</span>
+          <span id="sat-telemetry-zoom">ZOOM: 18 (BUILDING & HOUSE LEVEL)</span>
+        </div>
+      </div>
+
+      <div class="sat-hud-actions">
+        <button id="btn-sat-orbit-return" class="btn-sat-orbit-return" title="Return to 3D Space Orbit (Esc)">
+          <span>🚀 RETURN TO ORBIT</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Floating Map Control Dock -->
+    <div class="sat-control-dock">
+      <button class="sat-dock-btn active" data-map-layer="satellite" title="Esri High-Resolution Satellite (Houses, Rooftops & Terrain)">
+        <span class="dock-icon">🛰️</span>
+        <span class="dock-label">Satellite</span>
+      </button>
+      <button class="sat-dock-btn" data-map-layer="hybrid" title="Satellite with Street Names & House Labels">
+        <span class="dock-icon">🏷️</span>
+        <span class="dock-label">Hybrid</span>
+      </button>
+      <button class="sat-dock-btn" data-map-layer="streets" title="OpenStreetMap Road & Building Footprint Map">
+        <span class="dock-icon">🗺️</span>
+        <span class="dock-label">Streets</span>
+      </button>
+      <div class="sat-dock-divider"></div>
+      <button id="btn-sat-center-gps" class="sat-dock-btn btn-gps-locate" title="Zoom to My Exact Live Location">
+        <span class="dock-icon">📍</span>
+        <span class="dock-label">My Location</span>
+      </button>
+    </div>
+  </div>
 
   <!-- 2. Polished Initial Loading Screen -->
   <div id="loading-screen" class="loading-screen">

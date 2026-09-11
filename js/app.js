@@ -14,6 +14,9 @@ import { SimControls } from './ui/simControls.js';
 import { HelpModal } from './ui/helpModal.js';
 import { InfoPanel } from './ui/infoPanel.js';
 import { EarthFMManager } from './components/earthFMManager.js';
+import { LiveLocationMarker } from './components/liveLocationMarker.js';
+import { SatelliteMapViewer } from './components/satelliteMapViewer.js';
+import { DistanceService } from './services/distanceService.js';
 
 /**
  * Main Application Core — Segment 6 Wikipedia & Clickable Satellite System
@@ -91,6 +94,11 @@ class Application {
     const earthObj = this.planetFactory.planets.find(p => p.config.id === 'earth');
     if (earthObj) {
       this.earthFMManager.setEarthMesh(earthObj.planetMesh);
+      this.liveLocationMarker = new LiveLocationMarker(
+        earthObj.planetMesh,
+        this.sceneManager.scene,
+        this.interactionManager
+      );
     }
     this.interactionManager.setEarthFMManager(this.earthFMManager);
 
@@ -137,7 +145,19 @@ class Application {
     }
 
     this.loadingScreen = new LoadingScreen(() => {
-      // 3D engine initialized
+      // 3D engine initialized & loading screen dismissed
+    });
+
+    this.lastSatelliteMapCloseTime = 0;
+    this.satelliteMapViewer = new SatelliteMapViewer(() => {
+      // Returned from Satellite Map back to space orbit
+      this.lastSatelliteMapCloseTime = Date.now();
+      const earthObj = this.planetFactory.planets.find(p => p.config.id === 'earth');
+      if (earthObj) {
+        this.planetFactory.setActiveFocusParent('earth');
+        this.interactionManager.selectObject(earthObj.planetMesh, earthObj.config);
+        this.cameraAnimator.focusOnObject(earthObj.planetMesh, earthObj.config);
+      }
     });
 
     // 7. Connect Callbacks & Hierarchical Navigation
@@ -184,6 +204,8 @@ class Application {
         parentId = data.parentBodyId;
       } else if (data.type === 'satellite') {
         parentId = data.parentPlanetId;
+      } else if (data.type === 'user_location') {
+        parentId = 'earth';
       }
 
       // Activate satellite orbits and satellite labels for this parent body
@@ -205,15 +227,42 @@ class Application {
       this.interactionManager.selectObjectById(moonId);
     };
 
-    // InfoPanel Back To Parent Planet Clicked (e.g. ← BACK TO EARTH)
+    // InfoPanel Parent Planet Badge Clicked (e.g. [ <- Earth ])
     this.infoPanel.onSelectParentPlanetCallback = (planetId) => {
       this.interactionManager.selectObjectById(planetId);
     };
 
-    // InfoPanel Close Button Clicked
-    this.infoPanel.onCloseCallback = () => {
-      this.interactionManager.deselect();
-      this.planetFactory.setActiveFocusParent(null);
+    // Satellite Map Opening Callback from Info Panel
+    this.infoPanel.onOpenSatelliteMapCallback = (data) => {
+      const lat = (data && data.lat !== undefined) ? data.lat : DistanceService.userLocation.lat;
+      const lon = (data && data.lon !== undefined) ? data.lon : DistanceService.userLocation.lon;
+      const label = (data && data.name) ? data.name : 'Your Live Location';
+      this.satelliteMapViewer.open(lat, lon, 18, label);
+    };
+
+    // Double-Click Raycast Callback (Double-clicking live location or Earth zooms down to house-level map)
+    this.interactionManager.onDoubleClickCallback = (data, mesh, hitPoint) => {
+      if (data.type === 'user_location' || data.id === 'user-location') {
+        const lat = data.lat || DistanceService.userLocation.lat;
+        const lon = data.lon || DistanceService.userLocation.lon;
+        this.satelliteMapViewer.open(lat, lon, 18, 'Your Live Location');
+      } else if (data.id === 'earth' || data.type === 'earth_surface' || (data.parentPlanetId === 'earth' && data.type !== 'satellite')) {
+        let lat = data.lat;
+        let lon = data.lon;
+        let label = data.name || 'Earth Surface';
+        if (lat === undefined || lon === undefined) {
+          if (hitPoint && mesh && this.earthFMManager) {
+            const coords = this.earthFMManager.convertPointToLatLon(mesh, hitPoint);
+            lat = coords.latitude;
+            lon = coords.longitude;
+            label = `Surface: ${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
+          } else {
+            lat = DistanceService.userLocation.lat;
+            lon = DistanceService.userLocation.lon;
+          }
+        }
+        this.satelliteMapViewer.open(lat, lon, 18, label);
+      }
     };
 
     // Focus Target Button Clicked
@@ -240,18 +289,35 @@ class Application {
       this.cameraAnimator.resetToOverview();
     };
     this.infoPanel.onResetCallback = handleReset;
+    this.topNav.onResetCallback = handleReset;
     this.uiOverlay.onResetCallback = handleReset;
-
-    // Global Keyboard Shortcuts (R key & ESC key trigger Reset View)
     this.controlsManager.onResetShortcut = handleReset;
     this.controlsManager.onEscapeShortcut = handleReset;
-    this.controlsManager.onSpaceShortcut = () => {
+
+    // Window Resize Handler
+    window.addEventListener('resize', () => {
+      this.sceneManager.onWindowResize();
+    });
+
+    // Keyboard Shortcuts: 'R' key or 'Escape' key to Reset View, 'Space' to Pause/Resume
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R' || e.key === 'Escape') {
+        handleReset();
+      } else if (e.code === 'Space') {
+        e.preventDefault();
+        this.toggleSimulationPause();
+      }
+    });
+  }
+
+  toggleSimulationPause() {
+    if (this.simControls) {
       if (this.timeMultiplier > 0) {
         this.simControls.setSpeed(0);
       } else {
         this.simControls.setSpeed(1);
       }
-    };
+    }
   }
 
   animate() {
@@ -265,11 +331,47 @@ class Application {
     // Update Planet, Moon & Artificial Spacecraft Orbital Physics
     this.planetFactory.update(delta, this.timeMultiplier);
 
+    // Update 3D Live Location Marker on Earth Globe
+    if (this.liveLocationMarker) {
+      this.liveLocationMarker.update(delta);
+    }
+
     // Update Hover & Selection System
     this.interactionManager.update(delta);
 
     // Update Camera Lerp Transitions & Orbital Focus Tracking
     this.cameraAnimator.update(delta);
+
+    // Auto-transition to real satellite map when camera zooms very close to Earth surface
+    const canAutoTrigger = (Date.now() - this.lastSatelliteMapCloseTime) > 3000;
+    if (this.satelliteMapViewer && !this.satelliteMapViewer.isOpen && canAutoTrigger && !this.cameraAnimator.isFocusing) {
+      const earthObj = this.planetFactory.planets.find(p => p.config.id === 'earth');
+      if (earthObj && earthObj.planetMesh) {
+        const earthPos = new THREE.Vector3();
+        earthObj.planetMesh.getWorldPosition(earthPos);
+        const dist = this.sceneManager.camera.position.distanceTo(earthPos);
+        // Earth radius is 2.2; when zooming in close (< 2.68 units), smoothly open the satellite map
+        if (dist < 2.68) {
+          let lat = DistanceService.userLocation.lat;
+          let lon = DistanceService.userLocation.lon;
+          let label = 'Earth Surface Reconnaissance';
+
+          if (this.earthFMManager) {
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), this.sceneManager.camera);
+            const hits = raycaster.intersectObject(earthObj.planetMesh, true);
+            if (hits.length > 0) {
+              const coords = this.earthFMManager.convertPointToLatLon(earthObj.planetMesh, hits[0].point);
+              lat = coords.latitude;
+              lon = coords.longitude;
+              label = `Surface: ${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
+            }
+          }
+
+          this.satelliteMapViewer.open(lat, lon, 18, label);
+        }
+      }
+    }
 
     // Update Camera Flight Controls Damping
     this.controlsManager.update(delta);
